@@ -1,0 +1,2160 @@
+<!DOCTYPE html>
+<html lang="en" x-data="app()" x-init="init()" :class="{ 'dark': theme === 'dark' }">
+<head>
+    <meta charset="utf-8"/>
+    <title>Madre Sign</title>
+    <link href="madre-logo-notext.png" rel="icon" type="image/png"/>
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?display=swap&family=Inter%3Awght%40400%3B500%3B600%3B700&family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+    <!-- Quill.js Theme -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <!-- reCAPTCHA Script -->
+    <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaLoaded&render=explicit" async defer></script>
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Custom Styles -->
+    <style type="text/tailwindcss">
+        :root {
+        --primary-color: #0c7ff2;
+        --primary-text-color: #111827;
+        --secondary-text-color: #6b7280;
+        --label-text-color: #374151;
+        --sidebar-bg-color: #f9fafb;
+        --sidebar-hover-bg-color: #f3f4f6;
+        --sidebar-active-bg-color: #e5e7eb;
+        --border-color: #e5e7eb;
+        --tab-item-color: #000000;
+        --selected-tab-color: #0c7ff2;
+        --card-bg-color: #ffffff;
+        --unread-notification-bg-color: #f0f9ff;
+        --unread-notification-border-color: #bae6fd;
+        --notification-count-bg-color: #0c7ff2;
+        --notification-count-text-color: #ffffff;
+        --content-bg-color: #f3f4f6;
+        --placeholder-text-color: #a1a1aa;
+
+        /* Login Screen */
+        --input-bg: #ffffff;
+        --input-border: #d1d5db;
+        --input-text: #111827;
+        
+        /* View Switcher */
+        --switcher-bg: rgba(255, 255, 255, 0.8);
+        --switcher-border: rgba(230, 230, 230, 0.5);
+        --switcher-label-text: #6b7280;
+        --switcher-inactive-btn-bg: #f3f4f6;
+        --switcher-inactive-btn-text: #374151;
+        --switcher-inactive-btn-hover-bg: #e5e7eb;
+        
+        /* Light Theme Stat Colors (Darker) */
+        --stat-yellow-bg: #fef08a;
+        --stat-yellow-border: #fde047;
+        --stat-yellow-header: #854d0e;
+        --stat-yellow-main: #ca8a04;
+        --stat-yellow-subtext: #a16207;
+
+        --stat-orange-bg: #ffedd5;
+        --stat-orange-border: #fed7aa;
+        --stat-orange-header: #9a3412;
+        --stat-orange-main: #ea580c;
+        --stat-orange-subtext: #c2410c;
+        
+        --stat-blue-bg: #dbeafe;
+        --stat-blue-border: #bfdbfe;
+        --stat-blue-header: #1e40af;
+        --stat-blue-main: #2563eb;
+        --stat-blue-subtext: #1d4ed8;
+        }
+
+        .dark {
+            --primary-text-color: #f9fafb;
+            --secondary-text-color: #9ca3af;
+            --label-text-color: #d1d5db;
+            --sidebar-bg-color: #1f2937;
+            --sidebar-hover-bg-color: #374151;
+            --sidebar-active-bg-color: #4b5563;
+            --border-color: #374151;
+            --tab-item-color: #d1d5db;
+            --selected-tab-color: #0c7ff2;
+            --card-bg-color: #1f2937;
+            --unread-notification-bg-color: #334155;
+            --unread-notification-border-color: #475569;
+            --content-bg-color: #0f172a;
+            --placeholder-text-color: #71717a;
+
+            /* Login Screen */
+            --input-bg: #374151;
+            --input-border: #4b5563;
+            --input-text: #f9fafb;
+            
+            /* View Switcher */
+            --switcher-bg: rgba(31, 41, 55, 0.8);
+            --switcher-border: rgba(55, 65, 81, 0.5);
+            --switcher-label-text: #9ca3af;
+            --switcher-inactive-btn-bg: #4b5563;
+            --switcher-inactive-btn-text: #d1d5db;
+            --switcher-inactive-btn-hover-bg: #6b7280;
+
+            /* Dark Theme Stat Colors */
+            --stat-yellow-bg: rgba(113, 63, 18, 0.5);
+            --stat-yellow-border: #854d0e;
+            --stat-yellow-header: #fef08a;
+            --stat-yellow-main: #facc15;
+            --stat-yellow-subtext: #fde047;
+
+            --stat-orange-bg: rgba(124, 45, 18, 0.5);
+            --stat-orange-border: #9a3412;
+            --stat-orange-header: #fed7aa;
+            --stat-orange-main: #fb923c;
+            --stat-orange-subtext: #fdba74;
+
+            --stat-blue-bg: rgba(30, 64, 175, 0.5);
+            --stat-blue-border: #1e40af;
+            --stat-blue-header: #bfdbfe;
+            --stat-blue-main: #60a5fa;
+            --stat-blue-subtext: #93c5fd;
+        }
+
+        .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        [x-cloak] { display: none !important; }
+
+        /* Quill.js custom styles */
+        /* FIXED TOOLBAR STYLES */
+        #toolbar {
+            border-top: 1px solid var(--border-color) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            border-left: 0;
+            border-right: 0;
+            background-color: var(--card-bg-color);
+            display: flex;
+            justify-content: flex-start;
+            flex-wrap:  wrap;
+            padding: 0.5rem;
+            align-items: center;
+            min-height: 42px;
+        }
+
+        /* Custom scrollbar for WebKit browsers */
+        #toolbar::-webkit-scrollbar {
+            height: 4px;
+        }
+        #toolbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #toolbar::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .ql-formats {
+            float: none; /* Keep this */
+            display: flex; /* Make it a flex container */
+            align-items: center; /* Keep content vertically centered */
+            margin: 0 !important; /* Keep this */
+            padding: 0 4px; /* Reduced padding */
+            box-sizing: border-box;
+            flex-shrink: 0; /* CRITICAL: Prevent groups from shrinking *below* their content's needs */
+            min-width: fit-content; /* Ensure groups expand to fit content */
+            flex-wrap: wrap; /* NEW: Allow items *within* ql-formats to wrap */
+            gap: 4px; /* NEW: Add a small gap between items within a format group */
+        }
+
+        /* Slimmer dividers */
+        .ql-divider {
+            height: 20px; /* Slightly shorter */
+            width: 1px;
+            background-color: var(--border-color);
+            margin: 0 4px; /* Reduced spacing */
+            flex-shrink: 0;
+        }
+
+        /* Compact button styles */
+        .ql-snow .ql-toolbar button {
+            padding: 2px; /* Reduced padding */
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0; /* Prevent buttons from shrinking */
+        }
+
+        .ql-snow .ql-toolbar .ql-picker-label,
+        .ql-snow .ql-toolbar .ql-picker-item {
+            padding: 3px 10px; /* Reduced padding */
+            flex-shrink: 0; /* Prevent pickers from shrinking */
+        }
+
+        /* Custom icon sizing */
+        .ql-snow .ql-toolbar .material-symbols-outlined {
+            font-size: 18px !important; /* Smaller icons */
+        }
+        
+        .ql-snow .ql-picker-options {
+            white-space: nowrap;
+            z-index: 1000 !important;
+            position: absolute;
+        }
+
+        .ql-snow .ql-picker-options .ql-picker.ql-expanded {
+            z-index: 1000 !important;
+            position: absolute;
+        }
+
+        #editor-wrapper .ql-container {
+            border: none !important;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            flex-grow: 1;
+            overflow-y: auto;
+            color: var(--primary-text-color);
+        }
+        #editor-wrapper .ql-editor {
+                padding: 1rem;
+        }
+        /* Shake Animation for Login Error */
+        @keyframes shake {
+            10%, 90% { transform: translateX(-1px); }
+            20%, 80% { transform: translateX(2px); }
+            30%, 50%, 70% { transform: translateX(-3px); }
+            40%, 60% { transform: translateX(3px); }
+        }
+        .animate-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: var(--placeholder-text-color);
+            font-weight: normal;
+        }
+
+        .ql-editor::before {
+            color: var(--placeholder-text-color) !important;
+            font-style: normal !important;
+            font-weight: normal !important;
+        }
+
+        .dark .ql-snow .ql-picker-options,
+        .dark .ql-snow .ql-tooltip {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--primary-text-color);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        .dark .ql-snow .ql-picker-item {
+            color: var(--primary-text-color);
+        }
+
+        .dark .ql-snow .ql-picker:hover,
+        .dark .ql-snow .ql-picker.ql-selected {
+            background-color: var(--sidebar-hover-bg-color);
+            border-radius: 4px;
+        }
+
+        .dark .ql-tooltip input[type=text] {
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--input-text);
+            border-radius: 4px;
+        }
+
+        .dark .ql-tooltip a.ql-action::before {
+            background-color: var(--switcher-inactive-btn-bg);
+            border-radius: 5px;
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            font-weight: 500;
+        }
+        .dark .ql-tooltip a.ql-action:hover::before {
+            background-color: var(--switcher-inactive-btn-hover-bg);
+        }
+
+        .ql-snow .ql-stroke {
+            stroke: var(--primary-text-color);
+        }
+        .ql-snow .ql-fill {
+            fill: var(--primary-text-color);
+        }
+
+        .ql-snow .ql-picker-label {
+            color: var(--primary-text-color);
+        }
+
+        #toolbar button .material-symbols-outlined {
+            color: var(--primary-text-color);
+        }
+
+        .ql-snow.ql-toolbar button:hover,
+        .ql-snow.ql.toolbar .ql-picker:hover,
+        .ql-snow.ql.toolbar button.ql-active,
+        .ql-snow.ql.toolbar .ql-picker.ql-active {
+            color: var(--selected-tab-color); 
+            background-color: var(--sidebar-hover-bg-color); 
+            border-radius: 4px;
+        }
+
+        .dark .ql-snow.ql.toolbar button:hover .ql-stroke,
+        .dark .ql-snow.ql.toolbar button.ql-active .ql-stroke,
+        .dark .ql-snow.ql.toolbar button:hover .ql-stroke-miter,
+        .dark .ql-snow.ql.toolbar button.ql-active .ql-stroke-miter {
+            stroke: var(--selected-tab-color);
+        }
+
+        .dark .ql-snow.ql.toolbar button:hover .ql-fill,
+        .dark .ql-snow.ql.toolbar button.ql-active .ql-fill {
+            fill: var(--selected-tab-color);
+        }
+
+        #toolbar button:hover .material-symbols-outlined,
+        #toolbar button.ql-active .material-symbols-outlined {
+            color: var(--selected-tab-color);
+        }
+
+        /* Custom file input styles for New Document page */
+        .file-input-label {
+            border: 2px dashed var(--border-color);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .file-input-label:hover {
+            border-color: var(--primary-color);
+        }
+        .file-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-[var(--content-bg-color)]" style="font-family: Inter, 'Noto Sans', sans-serif;"
+       x-cloak>
+
+<!-- Login Screen -->
+<div x-show="!loggedIn" @recaptcha-verified.window="isRecaptchaVerified = $event.detail.verified; if (error === 'Please complete the reCAPTCHA.') { error = '' }" class="flex items-center justify-center h-screen px-4">
+    <div class="bg-[var(--card-bg-color)] rounded-lg shadow-lg p-8 sm:p-12 max-w-md w-full">
+    <div class="flex justify-center items-center gap-3 mb-8">
+        <img alt="Madre Logo" class="h-16" src="madre-logo-notext.png"/>
+        <div class="border-l h-12 border-[var(--border-color)]"></div>
+        <h1 class="text-2xl font-bold tracking-tight" style="color: var(--primary-text-color);">Madre Sign</h1>
+    </div>
+        <form @submit.prevent="login">
+            <div class="overflow-hidden transition-all duration-300 ease-in-out px-1" :style="error ? { maxHeight: '80px' } : { maxHeight: '0px' }">
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4" 
+                    :class="{ 'animate-shake': shaking }"
+                    role="alert">
+                    <span class="block sm:inline" x-text="error"></span>
+                </div>
+            </div>
+
+            <div class="mb-4 px-1">
+                <label class="block text-sm font-medium mb-2" for="username" style="color: var(--label-text-color);">Username</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">person</span>
+                    <input x-model="username" @input="error = ''" class="shadow-sm appearance-none border rounded-lg w-full py-3 pl-12 pr-3 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="username" name="username" placeholder="Enter your username" type="text" style="background-color: var(--input-bg); border-color: var(--input-border); color: var(--input-text);"/>
+                </div>
+            </div>
+            <div class="mb-4 px-1">
+                <label class="block text-sm font-medium mb-2" for="password" style="color: var(--label-text-color);">Password</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">lock</span>
+                    <input x-model="password" @input="error = ''" class="shadow-sm appearance-none border rounded-lg w-full py-3 pl-12 pr-3 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="password" name="password" placeholder="Enter your password" type="password" style="background-color: var(--input-bg); border-color: var(--input-border); color: var(--input-text);"/>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between mb-6">
+                <label for="remember-me" class="flex items-center cursor-pointer">
+                    <div class="relative">
+                        <input type="checkbox" id="remember-me" class="sr-only" x-model="rememberMe">
+                        <div class="block w-10 h-6 rounded-full" :class="rememberMe ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'"></div>
+                        <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform" :class="{ 'transform translate-x-full': rememberMe }"></div>
+                    </div>
+                    <div class="ml-3 text-sm" style="color: var(--label-text-color);">
+                        Remember me
+                    </div>
+                </label>
+            </div>
+
+            <div id="recaptcha-parent" class="mb-4 flex justify-center">
+                <div id="recaptcha-container"></div>
+            </div>
+
+            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition-opacity" 
+                    :disabled="!isRecaptchaVerified"
+                    :class="{ 'opacity-50 cursor-not-allowed': !isRecaptchaVerified }"
+                    type="submit">
+                Sign in
+            </button>
+        </form>
+        <p class="text-center text-gray-500 dark:text-gray-400 text-[11px] mt-6">
+            Forgot your password? Contact the system administrator to reset it.
+        </p>
+    </div>
+</div>
+
+
+<!-- Main Application Container -->
+<div x-show="loggedIn" class="flex h-screen bg-[var(--main-bg-color)]">
+    <!-- Floating View Switcher for Demo -->
+    <div class="fixed bottom-5 right-5 z-50">
+        <div class="flex items-center justify-end">
+            <div x-show="!isViewSwitcherCollapsed"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 translate-x-4"
+                x-transition:enter-end="opacity-100 translate-x-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-x-0"
+                x-transition:leave-end="opacity-0 translate-x-4"
+                class="backdrop-blur-sm pl-4 pr-3 py-3 rounded-l-xl shadow-2xl border-y border-l"
+                style="background-color: var(--switcher-bg); border-color: var(--switcher-border);">
+                <div class="flex items-center space-x-2">
+                    <label class="block text-xs font-bold uppercase mr-2" style="color: var(--switcher-label-text);">View As</label>
+                    <button @click="userType = 'admin'" type="button"
+                            class="px-4 py-1 text-sm font-medium rounded-md transition-colors"
+                            :class="userType === 'admin' ? 'bg-blue-600 text-white' : 'hover:bg-[var(--switcher-inactive-btn-hover-bg)]'"
+                            :style="userType !== 'admin' && { backgroundColor: 'var(--switcher-inactive-btn-bg)', color: 'var(--switcher-inactive-btn-text)' }">
+                        Admin
+                    </button>
+                    <button @click="userType = 'user'" type="button"
+                            class="px-4 py-1 text-sm font-medium rounded-md transition-colors"
+                            :class="userType === 'user' ? 'bg-blue-600 text-white' : 'hover:bg-[var(--switcher-inactive-btn-hover-bg)]'"
+                            :style="userType !== 'user' && { backgroundColor: 'var(--switcher-inactive-btn-bg)', color: 'var(--switcher-inactive-btn-text)' }">
+                        User
+                    </button>
+                </div>
+            </div>
+
+            <button @click="isViewSwitcherCollapsed = !isViewSwitcherCollapsed"
+                    class="backdrop-blur-sm p-3 shadow-2xl border transition-all"
+                    :class="{ 'rounded-xl': isViewSwitcherCollapsed, 'rounded-r-xl': !isViewSwitcherCollapsed }"
+                    style="background-color: var(--switcher-bg); border-color: var(--switcher-border);">
+                <span class="material-symbols-outlined text-[var(--switcher-label-text)] hover:text-[var(--primary-text-color)] transition-colors"
+                    x-text="isViewSwitcherCollapsed ? 'chevron_left' : 'chevron_right'"></span>
+            </button>
+        </div>
+    </div>
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-[var(--sidebar-bg-color)] flex flex-col border-r border-[var(--border-color)]">
+        <div class="h-36 w-full flex items-center justify-center py-2 border-b border-[var(--border-color)]">
+            <img src="madre-logo-text.png" alt="Madre Logo" class="max-h-full max-w-full">
+        </div>
+        <nav class="flex-grow pt-6 space-y-1 px-4">
+            <!-- Home Link -->
+            <a href="#" @click.prevent="page = 'home'" class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors" :class="{
+                'bg-[var(--sidebar-active-bg-color)] text-[var(--selected-tab-color)]': page === 'home',
+                'text-[var(--tab-item-color)] hover:bg-[var(--sidebar-hover-bg-color)] hover:text-[var(--selected-tab-color)]': page !== 'home'
+            }">
+                <span class="material-symbols-outlined text-xl">home</span>
+                <span class="text-sm font-medium">Home</span>
+            </a>
+            <!-- New Document Link -->
+            <a href="#" @click.prevent="page = 'newDocument'" class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors" :class="{
+                'bg-[var(--sidebar-active-bg-color)] text-[var(--selected-tab-color)]': page === 'newDocument',
+                'text-[var(--tab-item-color)] hover:bg-[var(--sidebar-hover-bg-color)] hover:text-[var(--selected-tab-color)]': page !== 'newDocument'
+            }">
+                <span class="material-symbols-outlined text-xl">add_box</span>
+                <span class="text-sm font-medium">New Document</span>
+            </a>
+            <!-- Inbox Link -->
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[var(--tab-item-color)] hover:bg-[var(--sidebar-hover-bg-color)] hover:text-[var(--selected-tab-color)] transition-colors">
+                <span class="material-symbols-outlined text-xl">inbox</span>
+                <span class="text-sm font-medium">Inbox</span>
+            </a>
+            <!-- Documents Link -->
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[var(--tab-item-color)] hover:bg-[var(--sidebar-hover-bg-color)] hover:text-[var(--selected-tab-color)] transition-colors">
+                <span class="material-symbols-outlined text-xl">folder</span>
+                <span class="text-sm font-medium">Documents</span>
+            </a>
+            <!-- Notifications Link -->
+            <a href="#" @click.prevent="page = 'notifications'" class="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-colors" :class="{
+                'bg-[var(--sidebar-active-bg-color)] text-[var(--selected-tab-color)]': page === 'notifications',
+                'text-[var(--tab-item-color)] hover:bg-[var(--sidebar-hover-bg-color)] hover:text-[var(--selected-tab-color)]': page !== 'notifications'
+            }">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-xl">notifications</span>
+                    <span class="text-sm font-medium">Notifications</span>
+                </div>
+                <span class="text-[var(--notification-count-text-color)] bg-[var(--notification-count-bg-color)] text-xs font-semibold px-1.5 py-0.5 rounded-full">4</span>
+            </a>
+            <!-- Settings Link -->
+            <a href="#" @click.prevent="page = 'settings'" class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors" :class="{
+                'bg-[var(--sidebar-active-bg-color)] text-[var(--selected-tab-color)]': page.startsWith('settings'),
+                'text-[var(--tab-item-color)] hover:bg-[var(--sidebar-hover-bg-color)] hover:text-[var(--selected-tab-color)]': !page.startsWith('settings')
+            }">
+                <span class="material-symbols-outlined text-xl">settings</span>
+                <span class="text-sm font-medium">Settings</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-[var(--border-color)]">
+             <!-- Logout Link -->
+             <a href="#" @click.prevent="logout" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[var(--tab-item-color)] hover:bg-[var(--sidebar-hover-bg-color)] hover:text-[var(--selected-tab-color)] transition-colors">
+                <span class="material-symbols-outlined text-xl">logout</span>
+                <span class="text-sm font-medium">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto bg-[var(--content-bg-color)]">
+        <!-- Home Page Content -->
+        <div x-show="page === 'home'" class="p-8">
+            <div class="flex flex-col items-start justify-start h-full">
+                <h1 class="text-3xl font-semibold text-[var(--primary-text-color)] mb-8">Welcome, <span x-text="userType === 'admin' ? 'Melvin' : 'Asad'"></span>.</h1>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full mb-8">
+                    <!-- Stat Cards -->
+                    <div class="p-6 rounded-lg shadow border" style="background-color: var(--stat-yellow-bg); border-color: var(--stat-yellow-border);">
+                        <h2 class="text-lg font-medium" style="color: var(--stat-yellow-header);">Need Your Signature</h2>
+                        <p class="text-4xl font-bold mt-2" style="color: var(--stat-yellow-main);">5</p>
+                        <p class="text-sm mt-1" style="color: var(--stat-yellow-subtext);">Review and sign these documents.</p>
+                    </div>
+                    <div class="p-6 rounded-lg shadow border" style="background-color: var(--stat-orange-bg); border-color: var(--stat-orange-border);">
+                        <h2 class="text-lg font-medium" style="color: var(--stat-orange-header);">Awaiting Completion</h2>
+                        <p class="text-4xl font-bold mt-2" style="color: var(--stat-orange-main);">8</p>
+                        <p class="text-sm mt-1" style="color: var(--stat-orange-subtext);">Documents signed and awaiting others' signatures.</p>
+                    </div>
+                    <div class="p-6 rounded-lg shadow border" style="background-color: var(--stat-blue-bg); border-color: var(--stat-blue-border);">
+                        <h2 class="text-lg font-medium" style="color: var(--stat-blue-header);">Sent for Signatures</h2>
+                        <p class="text-4xl font-bold mt-2" style="color: var(--stat-blue-main);">12</p>
+                        <p class="text-sm mt-1" style="color: var(--stat-blue-subtext);">Documents sent and awaiting others' signatures.</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+                    <!-- "Need Your Signature" List -->
+                    <div class="bg-[var(--card-bg-color)] p-6 rounded-lg shadow border border-[var(--border-color)]">
+                        <div class="flex justify-between items-center mb-4"><h2 class="text-lg font-medium text-[var(--primary-text-color)]">Need Your Signature</h2><a class="text-sm text-[var(--primary-color)] font-medium hover:underline" href="#">View All</a></div>
+                        <ul class="space-y-2">
+                            <li class="flex items-center justify-between py-2 border-b border-[var(--border-color)] last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 px-1 -mx-1 rounded"><div class="flex-1 min-w-0"><p class="text-sm font-medium text-[var(--primary-text-color)] truncate">Al Futtaim - HVAC Technician - Cost Proposal</p><p class="text-xs text-[var(--secondary-text-color)]">Received: 28/07/2024 09:30 AM from Monica</p></div><button class="text-xs bg-[var(--primary-color)] text-white px-2.5 py-1 rounded-md hover:bg-blue-600 transition-colors ml-2 flex-shrink-0">Sign</button></li>
+                            <li class="flex items-center justify-between py-2 border-b border-[var(--border-color)] last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 px-1 -mx-1 rounded"><div class="flex-1 min-w-0"><p class="text-sm font-medium text-[var(--primary-text-color)] truncate">Ethos Energy - Mechanical Technician - Offer Letter 2of2</p><p class="text-xs text-[var(--secondary-text-color)]">Received: 27/07/2024 02:15 PM from Celci</p></div><button class="text-xs bg-[var(--primary-color)] text-white px-2.5 py-1 rounded-md hover:bg-blue-600 transition-colors ml-2 flex-shrink-0">Sign</button></li>
+                            <li class="flex items-center justify-between py-2 border-b border-[var(--border-color)] last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 px-1 -mx-1 rounded"><div class="flex-1 min-w-0"><p class="text-sm font-medium text-[var(--primary-text-color)] truncate">Annual Leave Salary - Ahmed Ibrahim</p><p class="text-xs text-[var(--secondary-text-color)]">Received: 26/07/2024 11:00 AM from Suhail</p></div><button class="text-xs bg-[var(--primary-color)] text-white px-2.5 py-1 rounded-md hover:bg-blue-600 transition-colors ml-2 flex-shrink-0">Sign</button></li>
+                        </ul>
+                    </div>
+                    <!-- "You Recently Signed" List -->
+                    <div class="bg-[var(--card-bg-color)] p-6 rounded-lg shadow border border-[var(--border-color)]">
+                        <div class="flex justify-between items-center mb-4"><h2 class="text-lg font-medium text-[var(--primary-text-color)]">You Recently Signed</h2><a class="text-sm text-[var(--primary-color)] font-medium hover:underline" href="#">View All</a></div>
+                        <ul class="space-y-2">
+                            <li class="flex items-center justify-between py-2 border-b border-[var(--border-color)] last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 px-1 -mx-1 rounded"><div class="flex-1 min-w-0"><p class="text-sm font-medium text-[var(--primary-text-color)] truncate">HBK - Safety Officer - Cost Proposal</p><p class="text-xs text-[var(--secondary-text-color)]">Signed: 25/07/2024 05:45 PM</p></div><span class="text-xs text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/50 px-2 py-0.5 rounded-full ml-2 flex-shrink-0">Completed</span></li>
+                            <li class="flex items-center justify-between py-2 border-b border-[var(--border-color)] last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 px-1 -mx-1 rounded"><div class="flex-1 min-w-0"><p class="text-sm font-medium text-[var(--primary-text-color)] truncate">Ethos Energy - Mechanical Technician - Offer Letter 1of2</p><p class="text-xs text-[var(--secondary-text-color)]">Signed: 24/07/2024 10:00 AM</p></div><span class="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-2 py-0.5 rounded-full ml-2 flex-shrink-0">In Progress</span></li>
+                            <li class="flex items-center justify-between py-2 border-b border-[var(--border-color)] last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 px-1 -mx-1 rounded"><div class="flex-1 min-w-0"><p class="text-sm font-medium text-[var(--primary-text-color)] truncate">Salary Advance - Safwan Khan</p><p class="text-xs text-[var(--secondary-text-color)]">Signed: 22/07/2024 03:30 PM</p></div><span class="text-xs text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/50 px-2 py-0.5 rounded-full ml-2 flex-shrink-0">Completed</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- "Latest Notifications" List -->
+                <div class="bg-[var(--card-bg-color)] p-6 rounded-lg shadow border border-[var(--border-color)] mt-6 w-full">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-medium text-[var(--primary-text-color)]">Latest Notifications</h2>
+                        <a class="text-sm text-[var(--primary-color)] font-medium hover:underline" href="#" @click.prevent="page = 'notifications'">View All</a>
+                    </div>
+                    <ul class="space-y-2">
+                        <li class="flex items-start py-2 border-b border-[var(--border-color)] last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 px-1 -mx-1 rounded"><span class="material-symbols-outlined text-base text-[var(--primary-color)] mr-2.5 mt-0.5 flex-shrink-0">info</span><div class="flex-1 min-w-0"><p class="text-sm font-medium text-[var(--primary-text-color)]">Master_Services_Agreement has been signed by Omar Farooq.</p><p class="text-xs text-[var(--secondary-text-color)]">28/07/2024 08:00 PM</p></div></li>
+                        <li class="flex items-start py-2 border-b border-[var(--border-color)] last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 px-1 -mx-1 rounded"><span class="material-symbols-outlined text-base text-yellow-500 mr-2.5 mt-0.5 flex-shrink-0">warning</span><div class="flex-1 min-w-0"><p class="text-sm font-medium text-[var(--primary-text-color)]">Reminder: Project_Proposal_Q3 signature is due tomorrow.</p><p class="text-xs text-[var(--secondary-text-color)]">27/07/2024 10:00 AM</p></div></li>
+                        <li class="flex items-start py-2 border-b border-[var(--border-color)] last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 px-1 -mx-1 rounded"><span class="material-symbols-outlined text-base text-green-500 mr-2.5 mt-0.5 flex-shrink-0">task_alt</span><div class="flex-1 min-w-0"><p class="text-sm font-medium text-[var(--primary-text-color)]">Employment_Contract_Laila is now fully signed and completed.</p><p class="text-xs text-[var(--secondary-text-color)]">25/07/2024 04:30 PM</p></div></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Document Page Content -->
+        <div x-show="page === 'newDocument'" x-data="newDocument()" class="p-4 sm:p-6 lg:p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Column: Main Content -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Header -->
+                    <h1 class="text-3xl font-semibold text-[var(--primary-text-color)]">New Document</h1>
+
+                    <!-- Upload Document Section -->
+                    <div class="bg-[var(--card-bg-color)] p-6 rounded-lg shadow-md border border-[var(--border-color)]">
+                        <h2 class="text-xl font-semibold text-[var(--primary-text-color)] mb-4">Upload Document</h2>
+                        <div class="relative w-full">
+                            <label for="file-upload" class="file-input-label">
+                                <span class="material-symbols-outlined text-5xl text-[var(--secondary-text-color)]">upload_file</span>
+                                <p class="mt-2 text-sm text-[var(--secondary-text-color)]">
+                                    <span class="font-semibold text-[var(--primary-color)]">Click to upload</span> or drag and drop
+                                </p>
+                                <p class="text-xs text-[var(--secondary-text-color)] mt-1">PDF, DOCX, PNG, JPG (MAX. 25MB)</p>
+                            </label>
+                            <input id="file-upload" type="file" class="file-input" @change="handleFiles($event.target.files)" multiple>
+                        </div>
+                        <!-- File List -->
+                        <div x-show="files.length > 0" class="mt-4 space-y-2">
+                            <template x-for="(file, index) in files" :key="index">
+                                <div class="flex items-center justify-between bg-[var(--sidebar-bg-color)] p-2 rounded-md border border-[var(--border-color)]">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <span class="material-symbols-outlined text-[var(--secondary-text-color)]">description</span>
+                                        <p class="text-sm text-[var(--primary-text-color)] truncate" x-text="file.name"></p>
+                                        <p class="text-xs text-[var(--secondary-text-color)] flex-shrink-0" x-text="formatBytes(file.size)"></p>
+                                    </div>
+                                    <button @click="removeFile(index)" class="text-[var(--secondary-text-color)] hover:text-red-500">
+                                        <span class="material-symbols-outlined text-lg">close</span>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Document Title -->
+                    <div class="bg-[var(--card-bg-color)] p-6 rounded-lg shadow-md border border-[var(--border-color)]">
+                        <label for="doc-title" class="text-xl font-semibold text-[var(--primary-text-color)] mb-4 block">Document Title</label>
+                        <input type="text" id="doc-title" placeholder="Enter document title" class="w-full rounded-md bg-transparent border-[var(--border-color)] shadow-sm focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)] sm:text-sm" style="color: var(--primary-text-color);">
+                    </div>
+
+                    <!-- Recipients Section -->
+                    <div class="bg-[var(--card-bg-color)] p-6 rounded-lg shadow-md border border-[var(--border-color)]">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold text-[var(--primary-text-color)]">Recipients</h2>
+                            <button @click="addRecipient" class="flex items-center gap-1 bg-[var(--primary-color)] text-white text-sm font-medium px-3 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                                <span class="material-symbols-outlined text-lg">add</span>
+                                Add Recipient
+                            </button>
+                        </div>
+                        <!-- Recipient List -->
+                        <div class="space-y-4">
+                            <template x-for="(recipient, index) in recipients" :key="index">
+                                <div class="border border-[var(--border-color)] rounded-lg p-4">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <p class="font-semibold text-[var(--primary-text-color)]" x-text="`Recipient ${index + 1}`"></p>
+                                        <button @click="removeRecipient(index)" class="text-[var(--secondary-text-color)] hover:text-red-500">
+                                            <span class="material-symbols-outlined text-lg">delete</span>
+                                        </button>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label :for="`name-${index}`" class="block text-sm font-medium text-[var(--label-text-color)]">Name</label>
+                                            <input type="text" :id="`name-${index}`" x-model="recipient.name" placeholder="e.g. John Doe" class="mt-1 block w-full rounded-md bg-transparent border-[var(--border-color)] shadow-sm focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)] sm:text-sm" style="color: var(--primary-text-color);">
+                                        </div>
+                                        <div>
+                                            <label :for="`email-${index}`" class="block text-sm font-medium text-[var(--label-text-color)]">Email</label>
+                                            <input type="email" :id="`email-${index}`" x-model="recipient.email" placeholder="e.g. john.doe@example.com" class="mt-1 block w-full rounded-md bg-transparent border-[var(--border-color)] shadow-sm focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)] sm:text-sm" style="color: var(--primary-text-color);">
+                                        </div>
+                                        <div>
+                                            <label :for="`role-${index}`" class="block text-sm font-medium text-[var(--label-text-color)]">Role</label>
+                                            <select :id="`role-${index}`" x-model="recipient.role" class="mt-1 block w-full rounded-md bg-transparent border-[var(--border-color)] shadow-sm focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)] sm:text-sm" style="color: var(--primary-text-color); background-color: var(--card-bg-color);">
+                                                <option value="signer">Signer</option>
+                                                <option value="copy">Receives a copy</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label :for="`template-${index}`" class="block text-sm font-medium text-[var(--label-text-color)]">Email Template</label>
+                                            <select :id="`template-${index}`" x-model="recipient.template" class="mt-1 block w-full rounded-md bg-transparent border-[var(--border-color)] shadow-sm focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)] sm:text-sm" style="color: var(--primary-text-color); background-color: var(--card-bg-color);">
+                                                <template x-for="(template, key) in emailTemplates" :key="key">
+                                                    <option :value="key" x-text="template.name"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div x-show="recipient.role === 'signer'">
+                                            <label :for="`order-${index}`" class="block text-sm font-medium text-[var(--label-text-color)]">Order</label>
+                                            <input type="number" :id="`order-${index}`" x-model.number="recipient.order" min="1" max="5" placeholder="1" class="mt-1 block w-full rounded-md bg-transparent border-[var(--border-color)] shadow-sm focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)] sm:text-sm" style="color: var(--primary-text-color);">
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label :for="`message-${index}`" class="block text-sm font-medium text-[var(--label-text-color)]">Custom Message (Optional)</label>
+                                            <textarea :id="`message-${index}`" x-model="recipient.message" rows="3" placeholder="Add a custom message for this recipient..." class="mt-1 block w-full rounded-md bg-transparent border-[var(--border-color)] shadow-sm focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)] sm:text-sm" style="color: var(--primary-text-color);"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end gap-4 pt-4">
+                        <button class="bg-gray-200 text-gray-800 font-medium px-6 py-2.5 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500 transition-colors">
+                            Save as Draft
+                        </button>
+                        <button @click="$dispatch('open-assign-fields', { recipients: recipients.filter(r => r.role === 'signer'), files: files })" class="bg-[var(--primary-color)] text-white font-medium px-6 py-2.5 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2">
+                            Assign Signature Fields
+                            <span class="material-symbols-outlined">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column: Signing Order Preview -->
+                <div class="lg:col-span-1">
+                    <div class="sticky top-8">
+                        <div class="bg-[var(--card-bg-color)] p-6 rounded-lg shadow-md border border-[var(--border-color)]">
+                            <h2 class="text-xl font-semibold text-[var(--primary-text-color)] mb-4">Signing Order</h2>
+                            <div class="flex items-center mb-4">
+                                <label for="signing-order-toggle" class="flex items-center cursor-pointer">
+                                    <div class="relative">
+                                        <input type="checkbox" id="signing-order-toggle" class="sr-only" x-model="sequentialSigning">
+                                        <div class="block w-10 h-6 rounded-full" :class="sequentialSigning ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'"></div>
+                                        <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform" :class="{ 'transform translate-x-full': sequentialSigning }"></div>
+                                    </div>
+                                    <div class="ml-3 text-sm font-medium text-[var(--label-text-color)]">
+                                        Set sequential signing order
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div x-show="!sequentialSigning" class="text-sm text-[var(--secondary-text-color)] p-4 bg-[var(--sidebar-bg-color)] rounded-md border border-[var(--border-color)]">
+                                All recipients will receive the document at the same time.
+                            </div>
+
+                            <div x-show="sequentialSigning" class="space-y-4">
+                                 <template x-for="(recipient, index) in signers" :key="recipient.email">
+                                    <div class="flex items-center gap-4">
+                                        <!-- Order Number -->
+                                        <div class="flex-shrink-0 h-8 w-8 flex items-center justify-center border-2 border-[var(--primary-color)] rounded-full text-[var(--primary-color)] font-bold text-sm"
+                                             x-text="index + 1">
+                                        </div>
+                                        <!-- Recipient Info -->
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-medium text-[var(--primary-text-color)] truncate" x-text="recipient.name || 'Recipient ' + (index + 1)"></p>
+                                            <p class="text-xs text-[var(--secondary-text-color)] truncate" x-text="recipient.email || 'No email provided'"></p>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div x-show="signers.length === 0" class="text-sm text-center text-[var(--secondary-text-color)] py-6">
+                                    Add recipients with the 'Signer' role to set the signing order.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assign Signature Fields Page -->
+        <div x-show="page === 'assignFields'" x-data="assignFields()" @open-assign-fields.window="page = 'assignFields'; recipients = $event.detail.recipients; files = $event.detail.files; initialize()" class="h-full flex flex-col">
+            <div class="flex-grow flex overflow-hidden">
+                <!-- Document Viewer -->
+                <div class="flex-grow bg-gray-200 dark:bg-gray-800/50 p-4 overflow-auto">
+<div class="flex-grow bg-gray-200 dark:bg-gray-800/50 p-4 overflow-auto">
+    <div @drop.prevent="dropField" @dragover.prevent class="relative w-[816px] h-[1056px] bg-white dark:bg-gray-700 shadow-lg mx-auto" id="document-viewer-container">
+        <canvas x-show="documentType === 'pdf'" id="pdf-canvas" class="absolute inset-0"></canvas>
+        
+        <img x-show="documentType === 'image'" :src="documentUrl" class="w-full h-full object-contain" />
+        
+        <div x-show="documentType === 'none'" class="absolute inset-0 flex items-center justify-center text-gray-400">
+            <p x-text="files.length > 0 ? 'File type not supported for preview.' : 'No document uploaded.'"></p>
+        </div>
+
+        <template x-for="field in fields.filter(f => f.recipientId === selectedRecipientId)" :key="field.id">
+            <div :style="`position: absolute; left: ${field.x}px; top: ${field.y}px; width: ${field.width}px; height: ${field.height}px;`"
+                class="border-2 border-dashed border-blue-500 bg-blue-500/10 flex items-center justify-center cursor-move resize overflow-hidden"
+                @mousedown="startDrag(field, $event)">
+                <span class="text-xs text-blue-800 dark:text-blue-200" x-text="field.type"></span>
+            </div>
+        </template>
+    </div>
+</div>
+                </div>
+
+                <!-- Right Sidebar -->
+                <aside class="w-72 bg-[var(--sidebar-bg-color)] border-l border-[var(--border-color)] flex flex-col">
+                    <!-- Recipients List -->
+                    <div class="p-4 border-b border-[var(--border-color)]">
+                        <h3 class="text-lg font-semibold text-[var(--primary-text-color)]">Recipients</h3>
+                    </div>
+                    <div class="overflow-y-auto">
+                        <template x-for="(recipient, index) in recipients" :key="index">
+                            <button @click="selectedRecipientId = index" 
+                                    class="w-full text-left p-3 flex items-center gap-3 transition-colors"
+                                    :class="{ 'bg-[var(--sidebar-active-bg-color)]': selectedRecipientId === index, 'hover:bg-[var(--sidebar-hover-bg-color)]': selectedRecipientId !== index }">
+                                <span class="material-symbols-outlined text-xl">person</span>
+                                <span class="text-sm font-medium text-[var(--primary-text-color)] truncate" x-text="recipient.name || `Recipient ${index + 1}`"></span>
+                            </button>
+                        </template>
+                    </div>
+                    <!-- Draggable Fields -->
+                    <div class="p-4 border-t border-[var(--border-color)] mt-auto">
+                        <h3 class="text-lg font-semibold text-[var(--primary-text-color)] mb-4">Fields</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div draggable="true" @dragstart="dragStart($event, 'Signature')" class="bg-[var(--card-bg-color)] border border-[var(--border-color)] rounded-md p-2 text-center cursor-grab">
+                                <span class="material-symbols-outlined text-2xl">draw</span>
+                                <p class="text-xs">Signature</p>
+                            </div>
+                            <div draggable="true" @dragstart="dragStart($event, 'Initials')" class="bg-[var(--card-bg-color)] border border-[var(--border-color)] rounded-md p-2 text-center cursor-grab">
+                                <span class="material-symbols-outlined text-2xl">edit</span>
+                                <p class="text-xs">Initials</p>
+                            </div>
+                            <div draggable="true" @dragstart="dragStart($event, 'Date')" class="bg-[var(--card-bg-color)] border border-[var(--border-color)] rounded-md p-2 text-center cursor-grab">
+                                <span class="material-symbols-outlined text-2xl">calendar_today</span>
+                                <p class="text-xs">Date</p>
+                            </div>
+                            <div draggable="true" @dragstart="dragStart($event, 'Time')" class="bg-[var(--card-bg-color)] border border-[var(--border-color)] rounded-md p-2 text-center cursor-grab">
+                                <span class="material-symbols-outlined text-2xl">schedule</span>
+                                <p class="text-xs">Time</p>
+                            </div>
+                            <div draggable="true" @dragstart="dragStart($event, 'Name')" class="bg-[var(--card-bg-color)] border border-[var(--border-color)] rounded-md p-2 text-center cursor-grab">
+                                <span class="material-symbols-outlined text-2xl">badge</span>
+                                <p class="text-xs">Name</p>
+                            </div>
+                            <div draggable="true" @dragstart="dragStart($event, 'Email')" class="bg-[var(--card-bg-color)] border border-[var(--border-color)] rounded-md p-2 text-center cursor-grab">
+                                <span class="material-symbols-outlined text-2xl">email</span>
+                                <p class="text-xs">Email</p>
+                            </div>
+                             <div draggable="true" @dragstart="dragStart($event, 'Company')" class="bg-[var(--card-bg-color)] border border-[var(--border-color)] rounded-md p-2 text-center cursor-grab">
+                                <span class="material-symbols-outlined text-2xl">business</span>
+                                <p class="text-xs">Company</p>
+                            </div>
+                            <div draggable="true" @dragstart="dragStart($event, 'Checkbox')" class="bg-[var(--card-bg-color)] border border-[var(--border-color)] rounded-md p-2 text-center cursor-grab">
+                                <span class="material-symbols-outlined text-2xl">check_box_outline_blank</span>
+                                <p class="text-xs">Checkbox</p>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+            <!-- Action Buttons -->
+            <div class="flex-shrink-0 bg-[var(--card-bg-color)] p-4 border-t border-[var(--border-color)] flex justify-between items-center">
+                <button @click="page = 'newDocument'" class="bg-gray-200 text-gray-800 font-medium px-6 py-2.5 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500 transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    Back
+                </button>
+                <div class="flex gap-4">
+                    <button class="bg-gray-200 text-gray-800 font-medium px-6 py-2.5 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500 transition-colors">
+                        Save as Draft
+                    </button>
+                    <button class="bg-[var(--primary-color)] text-white font-medium px-6 py-2.5 rounded-lg hover:bg-blue-600 transition-colors">
+                        Review & Finalize
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Page Content -->
+        <div x-show="page === 'notifications'" class="p-6">
+             <div class="w-full">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold text-[var(--primary-text-color)]">Notifications</h1>
+                    <div class="flex items-center gap-3">
+                        <button class="text-xs text-[var(--primary-color)] font-semibold hover:underline">Mark all as read</button>
+                        <button class="text-xs text-[var(--secondary-text-color)] font-medium hover:text-[var(--primary-text-color)] flex items-center gap-1 p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            <span class="material-symbols-outlined text-lg">filter_list</span> Filter
+                        </button>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <h2 class="text-xs font-semibold text-[var(--secondary-text-color)] uppercase tracking-wider mb-2 px-1">Today</h2>
+                        <ul class="space-y-2">
+                           <li class="bg-[var(--unread-notification-bg-color)] p-2.5 rounded-md shadow-sm border border-[var(--unread-notification-border-color)] flex items-center gap-3 hover:shadow-md transition-shadow duration-200 ease-in-out cursor-pointer"><div class="flex-shrink-0 w-6 h-6 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center border border-red-200 dark:border-red-800"><span class="material-symbols-outlined text-sm text-red-600 dark:text-red-400">cancel</span></div><div class="flex-1 min-w-0"><div class="flex justify-between items-center"><div class="truncate"><p class="text-xs font-medium text-[var(--primary-text-color)] leading-tight truncate">Salary Advance - Safwan Khan</p><p class="text-[10px] text-[var(--secondary-text-color)] truncate">At least one participant has declined signing this document.</p></div><span class="text-[10px] text-[var(--secondary-text-color)] whitespace-nowrap ml-2">28/07/2024 10:15 AM</span></div></div></li>
+                           <li class="bg-[var(--unread-notification-bg-color)] p-2.5 rounded-md shadow-sm border border-[var(--unread-notification-border-color)] flex items-center gap-3 hover:shadow-md transition-shadow duration-200 ease-in-out cursor-pointer"><div class="flex-shrink-0 w-6 h-6 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center border border-red-200 dark:border-red-800"><span class="material-symbols-outlined text-sm text-red-600 dark:text-red-400">thumb_down</span></div><div class="flex-1 min-w-0"><div class="flex justify-between items-center"><div class="truncate"><p class="text-xs font-medium text-[var(--primary-text-color)] leading-tight truncate">Salary Advance - Safwan Khan</p><p class="text-[10px] text-[var(--secondary-text-color)] truncate">Aditya has declined signing this document.</p></div><span class="text-[10px] text-[var(--secondary-text-color)] whitespace-nowrap ml-2">28/07/2024 09:45 AM</span></div></div></li>
+                           <li class="bg-[var(--unread-notification-bg-color)] p-2.5 rounded-md shadow-sm border border-[var(--unread-notification-border-color)] flex items-center gap-3 hover:shadow-md transition-shadow duration-200 ease-in-out cursor-pointer"><div class="flex-shrink-0 w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center border border-orange-200 dark:border-orange-800"><span class="material-symbols-outlined text-sm text-orange-600 dark:text-orange-400">event_busy</span></div><div class="flex-1 min-w-0"><div class="flex justify-between items-center"><div class="truncate"><p class="text-xs font-medium text-[var(--primary-text-color)] leading-tight truncate">Annual Leave Salary - Ahmed Ibrahim</p><p class="text-[10px] text-[var(--secondary-text-color)] truncate">At least one participant didn't sign this document before the due date.</p></div><span class="text-[10px] text-[var(--secondary-text-color)] whitespace-nowrap ml-2">28/07/2024 09:30 AM</span></div></div></li>
+                           <li class="bg-[var(--unread-notification-bg-color)] p-2.5 rounded-md shadow-sm border border-[var(--unread-notification-border-color)] flex items-center gap-3 hover:shadow-md transition-shadow duration-200 ease-in-out cursor-pointer"><div class="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-600"><span class="material-symbols-outlined text-sm text-gray-600 dark:text-gray-400">block</span></div><div class="flex-1 min-w-0"><div class="flex justify-between items-center"><div class="truncate"><p class="text-xs font-medium text-[var(--primary-text-color)] leading-tight truncate">Al Futtaim - HVAC Technician - Cost Proposal</p><p class="text-[10px] text-[var(--secondary-text-color)] truncate">Monica has voided this document.</p></div><span class="text-[10px] text-[var(--secondary-text-color)] whitespace-nowrap ml-2">28/07/2024 08:00 AM</span></div></div></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h2 class="text-xs font-semibold text-[var(--secondary-text-color)] uppercase tracking-wider mb-2 px-1">Yesterday</h2>
+                        <ul class="space-y-2">
+                            <li class="bg-[var(--card-bg-color)] p-2.5 rounded-md shadow-sm border border-[var(--border-color)] flex items-center gap-3 hover:shadow-md transition-shadow duration-200 ease-in-out cursor-pointer"><div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/50 flex items-center justify-center border border-green-200 dark:border-green-800"><span class="material-symbols-outlined text-sm text-green-600 dark:text-green-400">task_alt</span></div><div class="flex-1 min-w-0"><div class="flex justify-between items-center"><div class="truncate"><p class="text-xs font-medium text-[var(--primary-text-color)] leading-tight truncate">HBK - Safety Officer - Cost Proposal</p><p class="text-[10px] text-[var(--secondary-text-color)] truncate">All recipients have signed this document.</p></div><span class="text-[10px] text-[var(--secondary-text-color)] whitespace-nowrap ml-2">27/07/2024 11:45 PM</span></div></div></li>
+                            <li class="bg-[var(--card-bg-color)] p-2.5 rounded-md shadow-sm border border-[var(--border-color)] flex items-center gap-3 hover:shadow-md transition-shadow duration-200 ease-in-out cursor-pointer"><div class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center border border-blue-200 dark:border-blue-800"><span class="material-symbols-outlined text-sm text-[var(--primary-color)]">edit_document</span></div><div class="flex-1 min-w-0"><div class="flex justify-between items-center"><div class="truncate"><p class="text-xs font-medium text-[var(--primary-text-color)] leading-tight truncate">HBK - Safety Officer - Cost Proposal</p><p class="text-[10px] text-[var(--secondary-text-color)] truncate">Melvin has signed this document.</p></div><span class="text-[10px] text-[var(--secondary-text-color)] whitespace-nowrap ml-2">27/07/2024 05:15 PM</span></div></div></li>
+                            <li class="bg-[var(--card-bg-color)] p-2.5 rounded-md shadow-sm border border-[var(--border-color)] flex items-center gap-3 hover:shadow-md transition-shadow duration-200 ease-in-out cursor-pointer"><div class="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center border border-purple-200 dark:border-purple-800"><span class="material-symbols-outlined text-sm text-purple-600 dark:text-purple-400">assignment_ind</span></div><div class="flex-1 min-w-0"><div class="flex justify-between items-center"><div class="truncate"><p class="text-xs font-medium text-[var(--primary-text-color)] leading-tight truncate">Ethos Energy - Mechanical Technician - Offer Letter 1of2</p><p class="text-[10px] text-[var(--secondary-text-color)] truncate">Celci has requested you to sign this document.</p></div><span class="text-[10px] text-[var(--secondary-text-color)] whitespace-nowrap ml-2">27/07/2024 10:00 AM</span></div></div></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h2 class="text-xs font-semibold text-[var(--secondary-text-color)] uppercase tracking-wider mb-2 px-1">26/07/2024</h2>
+                        <ul class="space-y-2">
+                            <li class="bg-[var(--card-bg-color)] p-2.5 rounded-md shadow-sm border border-[var(--border-color)] flex items-center gap-3 hover:shadow-md transition-shadow duration-200 ease-in-out cursor-pointer"><div class="flex-shrink-0 w-6 h-6 rounded-full bg-yellow-100 dark:bg-yellow-900/50 flex items-center justify-center border border-yellow-200 dark:border-yellow-800"><span class="material-symbols-outlined text-sm text-yellow-600 dark:text-yellow-400">hourglass_top</span></div><div class="flex-1 min-w-0"><div class="flex justify-between items-center"><div class="truncate"><p class="text-xs font-medium text-[var(--primary-text-color)] leading-tight truncate">Ethos Energy - Mechanical Technician - Offer Letter 2of2</p><p class="text-[10px] text-[var(--secondary-text-color)] truncate">Your signature is due in 6 hours.</p></div><span class="text-[10px] text-[var(--secondary-text-color)] whitespace-nowrap ml-2">26/07/2024 09:00 AM</span></div></div></li>
+                        </ul>
+                    </div>
+                    <div class="text-center pt-3">
+                        <button class="text-xs text-[var(--primary-color)] font-semibold hover:underline py-1.5 px-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">Load more notifications</button>
+                    </div>
+                </div>
+             </div>
+        </div>
+
+        <!-- Settings Page Content -->
+        <div x-show="page.startsWith('settings')" class="p-8">
+            <!-- Admin Settings Menu -->
+            <div x-show="page === 'settings' && userType === 'admin'">
+                <h1 class="text-3xl font-semibold text-[var(--primary-text-color)] mb-8">Settings</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <a href="#" @click.prevent="page = 'settings.profile'" class="block bg-[var(--card-bg-color)] rounded-lg shadow-md p-6 border border-[var(--border-color)] hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-center mb-4"><span class="material-symbols-outlined text-3xl text-[var(--primary-color)] mr-3">account_circle</span><h2 class="text-xl font-semibold text-[var(--primary-text-color)]">Profile</h2></div>
+                        <p class="text-sm text-[var(--secondary-text-color)] mb-4">View your profile and personal information.</p>
+                        <span class="inline-flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">View Profile <span class="material-symbols-outlined text-lg ml-1">arrow_forward</span></span>
+                    </a>
+                    <a href="#" @click.prevent="page = 'settings.companyInfo'" class="block bg-[var(--card-bg-color)] rounded-lg shadow-md p-6 border border-[var(--border-color)] hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-center mb-4"><span class="material-symbols-outlined text-3xl text-[var(--primary-color)] mr-3">business</span><h2 class="text-xl font-semibold text-[var(--primary-text-color)]">Company Information</h2></div>
+                        <p class="text-sm text-[var(--secondary-text-color)] mb-4">Manage your company's details and branding.</p>
+                        <span class="inline-flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">View & Edit <span class="material-symbols-outlined text-lg ml-1">arrow_forward</span></span>
+                    </a>
+                    <a href="#" @click.prevent="page = 'settings.emailTemplates'" class="block bg-[var(--card-bg-color)] rounded-lg shadow-md p-6 border border-[var(--border-color)] hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-center mb-4"><span class="material-symbols-outlined text-3xl text-[var(--primary-color)] mr-3">mail</span><h2 class="text-xl font-semibold text-[var(--primary-text-color)]">Email Templates</h2></div>
+                        <p class="text-sm text-[var(--secondary-text-color)] mb-4">Manage the email templates available to users.</p>
+                        <span class="inline-flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">View & Edit<span class="material-symbols-outlined text-lg ml-1">arrow_forward</span></span>
+                    </a>
+                    <a href="#" @click.prevent="page = 'settings.manageUsers'" class="block bg-[var(--card-bg-color)] rounded-lg shadow-md p-6 border border-[var(--border-color)] hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-center mb-4"><span class="material-symbols-outlined text-3xl text-[var(--primary-color)] mr-3">group</span><h2 class="text-xl font-semibold text-[var(--primary-text-color)]">Manage Users</h2></div>
+                        <p class="text-sm text-[var(--secondary-text-color)] mb-4">Manage user accounts and their details.</p>
+                        <span class="inline-flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">View & Edit<span class="material-symbols-outlined text-lg ml-1">arrow_forward</span></span>
+                    </a>
+                    <div class="bg-[var(--card-bg-color)] rounded-lg shadow-md p-6 border border-[var(--border-color)] hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-center mb-4">
+                            <span class="material-symbols-outlined text-3xl text-[var(--primary-color)] mr-3">desktop_windows</span>
+                            <h2 class="text-xl font-semibold text-[var(--primary-text-color)]">Appearance</h2>
+                        </div>
+                        <p class="text-sm text-[var(--secondary-text-color)] mb-4">Customize the look and feel of the application.</p>
+                        <div class="flex items-center space-x-2">
+                            <button @click="setTheme('light')" type="button" class="px-4 py-1 text-sm font-medium rounded-md transition-colors" :class="theme === 'light' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'">
+                                Light
+                            </button>
+                            <button @click="setTheme('dark')" type="button" class="px-4 py-1 text-sm font-medium rounded-md transition-colors" :class="theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'">
+                                Dark
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- User Settings Menu -->
+            <div x-show="page === 'settings' && userType === 'user'">
+                 <h1 class="text-3xl font-semibold text-[var(--primary-text-color)] mb-8">Settings</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <a href="#" @click.prevent="page = 'settings.profile'" class="block bg-[var(--card-bg-color)] rounded-lg shadow-md p-6 border border-[var(--border-color)] hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-center mb-4"><span class="material-symbols-outlined text-3xl text-[var(--primary-color)] mr-3">account_circle</span><h2 class="text-xl font-semibold text-[var(--primary-text-color)]">Profile</h2></div>
+                        <p class="text-sm text-[var(--secondary-text-color)] mb-4">View your profile and personal information.</p>
+                        <span class="inline-flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">View Profile<span class="material-symbols-outlined text-lg ml-1">arrow_forward</span></span>
+                    </a>
+                    <a href="#" @click.prevent="page = 'settings.emailTemplates'" class="block bg-[var(--card-bg-color)] rounded-lg shadow-md p-6 border border-[var(--border-color)] hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-center mb-4"><span class="material-symbols-outlined text-3xl text-[var(--primary-color)] mr-3">mail</span><h2 class="text-xl font-semibold text-[var(--primary-text-color)]">Email Templates</h2></div>
+                        <p class="text-sm text-[var(--secondary-text-color)] mb-4">View the email templates available to you.</p>
+                        <span class="inline-flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">View & Edit<span class="material-symbols-outlined text-lg ml-1">arrow_forward</span></span>
+                    </a>
+                     <div class="bg-[var(--card-bg-color)] rounded-lg shadow-md p-6 border border-[var(--border-color)] hover:shadow-lg transition-shadow duration-300">
+                        <div class="flex items-center mb-4">
+                            <span class="material-symbols-outlined text-3xl text-[var(--primary-color)] mr-3">desktop_windows</span>
+                            <h2 class="text-xl font-semibold text-[var(--primary-text-color)]">Appearance</h2>
+                        </div>
+                        <p class="text-sm text-[var(--secondary-text-color)] mb-4">Customize the look and feel of the application.</p>
+                        <div class="flex items-center space-x-2">
+                            <button @click="setTheme('light')" type="button" class="px-4 py-1 text-sm font-medium rounded-md transition-colors" :class="theme === 'light' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'">
+                                Light
+                            </button>
+                            <button @click="setTheme('dark')" type="button" class="px-4 py-1 text-sm font-medium rounded-md transition-colors" :class="theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'">
+                                Dark
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div x-show="page === 'settings.profile'">
+                <h1 class="text-3xl font-semibold text-[var(--primary-text-color)] mb-8"><a href="#" @click.prevent="page='settings'" class="text-[var(--secondary-text-color)] hover:underline">Settings</a> / Profile</h1>
+                <!-- Admin Profile View -->
+                <div x-show="userType === 'admin'" class="bg-[var(--card-bg-color)] rounded-lg shadow-md p-6 md:p-8 border border-[var(--border-color)]">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="md:col-span-1 flex flex-col items-center"><div class="w-40 h-40 rounded-full bg-gray-200 dark:bg-gray-700 mb-4 flex items-center justify-center overflow-hidden"><span class="material-symbols-outlined text-6xl text-gray-400 dark:text-gray-500">person</span></div><div class="w-full p-4 border border-[var(--border-color)] rounded-md text-center"><p class="text-lg font-semibold text-[var(--primary-text-color)] mb-2">Signature</p><div class="h-32 w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded flex items-center justify-center"><span class="material-symbols-outlined text-5xl text-gray-400 dark:text-gray-500">signature</span></div></div></div>
+                        <div class="md:col-span-2"><div class="space-y-6"><div class="grid grid-cols-1 sm:grid-cols-2 gap-6"><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Username</label><p class="mt-1 text-base text-[var(--primary-text-color)]">melvin</p></div><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Password</label><p class="mt-1 text-base text-[var(--primary-text-color)]">••••••••</p></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-6"><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Email</label><p class="mt-1 text-base text-[var(--primary-text-color)]">mathew@madre-me.com</p></div><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Role</label><p class="mt-1 text-base text-[var(--primary-text-color)]">Administrator</p></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-6"><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">First Name</label><p class="mt-1 text-base text-[var(--primary-text-color)]">Melvin</p></div><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Last Name</label><p class="mt-1 text-base text-[var(--primary-text-color)]">Mathew</p></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-6"><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Job Title</p><p class="mt-1 text-base text-[var(--primary-text-color)]">COO</p></div><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Department</label><p class="mt-1 text-base text-[var(--primary-text-color)]">Management</p></div></div></div></div>
+                    </div>
+                    <div class="mt-8 pt-6 border-t border-[var(--border-color)]"><p class="text-sm text-[var(--secondary-text-color)] flex items-center"><span class="material-symbols-outlined text-lg text-[var(--primary-color)] mr-2">info</span> Go to Settings -> Manage Users if you want to change your profile information.</p></div>
+                </div>
+                <!-- User Profile View -->
+                <div x-show="userType === 'user'" class="bg-[var(--card-bg-color)] rounded-lg shadow-md p-6 md:p-8 border border-[var(--border-color)]">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="md:col-span-1 flex flex-col items-center"><div class="w-40 h-40 rounded-full bg-gray-200 dark:bg-gray-700 mb-4 flex items-center justify-center overflow-hidden"><span class="material-symbols-outlined text-6xl text-gray-400 dark:text-gray-500">person</span></div><div class="w-full p-4 border border-[var(--border-color)] rounded-md text-center"><p class="text-lg font-semibold text-[var(--primary-text-color)] mb-2">Signature</p><div class="h-32 w-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded flex items-center justify-center"><span class="material-symbols-outlined text-5xl text-gray-400 dark:text-gray-500">signature</span></div></div></div>
+                        <div class="md:col-span-2"><div class="space-y-6"><div class="grid grid-cols-1 sm:grid-cols-2 gap-6"><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Username</label><p class="mt-1 text-base text-[var(--primary-text-color)]">asad</p></div><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Password</label><p class="mt-1 text-base text-[var(--primary-text-color)]">••••••••</p></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-6"><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Email</label><p class="mt-1 text-base text-[var(--primary-text-color)]">asad@madre-me.com</p></div><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Role</label><p class="mt-1 text-base text-[var(--primary-text-color)]">Standard</p></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-6"><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">First Name</label><p class="mt-1 text-base text-[var(--primary-text-color)]">Asad</p></div><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Last Name</p><p class="mt-1 text-base text-[var(--primary-text-color)]">Rauf</p></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-6"><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Job Title</label><p class="mt-1 text-base text-[var(--primary-text-color)]">Intern</p></div><div><label class="block text-sm font-medium text-[var(--secondary-text-color)]">Department</label><p class="mt-1 text-base text-[var(--primary-text-color)]">HR</p></div></div></div></div>
+                    </div>
+                    <div class="mt-8 pt-6 border-t border-[var(--border-color)]"><p class="text-sm text-[var(--secondary-text-color)] flex items-center"><span class="material-symbols-outlined text-lg text-[var(--primary-color)] mr-2">info</span> Contact the system administrator if you want to change your profile information.</p></div>
+                </div>
+            </div>
+
+            <!-- Company Information Page -->
+            <div x-show="page === 'settings.companyInfo'">
+                <header class="mb-8">
+                    <h1 class="text-3xl font-semibold text-[var(--primary-text-color)]"><a href="#" @click.prevent="page='settings'" class="text-[var(--secondary-text-color)] hover:underline">Settings</a> / <span class="text-black dark:text-white">Company Information</span></h1>
+                </header>
+                <div class="bg-[var(--card-bg-color)] rounded-lg shadow-md p-6 border border-[var(--border-color)]">
+                    <div class="space-y-8">
+            
+                        <!-- Company Name -->
+                        <div class="flex items-center">
+                            <h2 class="text-lg font-medium text-[var(--primary-text-color)] w-40 shrink-0">Company Name</h2>
+                            <div>
+                                <p x-show="!editingCompanyName" 
+                                   x-text="companyName || 'Enter company name'" 
+                                   :class="{ 'text-gray-400 dark:text-gray-500': !companyName }"
+                                   :title="companyName"
+                                   class="w-64 -indent-3 rounded-md border border-transparent bg-transparent px-3 py-2 text-base text-[var(--primary-text-color)] truncate">
+                                </p>
+                                <input x-show="editingCompanyName" 
+                                       x-model="tempCompanyName" 
+                                       placeholder="Enter company name"
+                                       class="w-64 rounded-md border-[var(--border-color)] bg-transparent px-3 py-2 text-base text-[var(--primary-text-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]" type="text"/>
+                            </div>
+                            <div class="flex items-center ml-4 space-x-2">
+                                <button x-show="!editingCompanyName" @click="startEditing('companyName')" class="flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">
+                                    <span class="material-symbols-outlined text-lg mr-1">edit</span> Edit
+                                </button>
+                                <button x-show="editingCompanyName" 
+                                        @click="saveEdit('companyName')" 
+                                        :disabled="!tempCompanyName.trim()"
+                                        :class="{'opacity-50 cursor-not-allowed': !tempCompanyName.trim()}"
+                                        class="text-sm font-medium text-green-600 hover:underline">Save</button>
+                                <button x-show="editingCompanyName" @click="cancelEdit('companyName')" class="text-sm font-medium text-red-600 hover:underline">Cancel</button>
+                            </div>
+                        </div>
+            
+                        <!-- Company Logo -->
+                        <div class="flex items-start">
+                            <h2 class="text-lg font-medium text-[var(--primary-text-color)] w-40 shrink-0 pt-1">Company Logo</h2>
+                            <div>
+                                <input type="file" x-ref="logoFileInput" @change="handleFileUpload($event, 'logo')" accept="image/*" class="hidden">
+                                <div class="w-64 h-64 border border-[var(--border-color)] rounded-md flex items-center justify-center bg-gray-50 dark:bg-gray-800/50">
+                                    <div x-show="!companyLogo && !tempCompanyLogo" class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                                        <span class="text-gray-500 text-sm">Upload Logo</span>
+                                    </div>
+                                    <img x-show="tempCompanyLogo" :src="tempCompanyLogo" alt="Logo Preview" class="w-full h-full object-contain p-2">
+                                    <img x-show="!tempCompanyLogo && companyLogo" :src="companyLogo" alt="Company Logo" class="w-full h-full object-contain p-2">
+                                </div>
+                            </div>
+                            <div class="flex items-center ml-4 space-x-2 pt-1">
+                                 <button x-show="!tempCompanyLogo" @click="triggerFileInput('logoFileInput')" class="flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">
+                                    <span class="material-symbols-outlined text-lg mr-1">edit</span> Edit
+                                </button>
+                                <button x-show="tempCompanyLogo" @click="saveEdit('companyLogo')" class="text-sm font-medium text-green-600 hover:underline">Save</button>
+                                <button x-show="tempCompanyLogo" @click="cancelEdit('companyLogo')" class="text-sm font-medium text-red-600 hover:underline">Cancel</button>
+                            </div>
+                        </div>
+            
+                        <!-- Company Stamp -->
+                        <div class="flex items-start">
+                            <h2 class="text-lg font-medium text-[var(--primary-text-color)] w-40 shrink-0 pt-1">Company Stamp</h2>
+                            <div>
+                                <input type="file" x-ref="stampFileInput" @change="handleFileUpload($event, 'stamp')" accept="image/*" class="hidden">
+                                <div class="w-64 h-64 border border-[var(--border-color)] rounded-md flex items-center justify-center bg-gray-50 dark:bg-gray-800/50">
+                                     <div x-show="!companyStamp && !tempCompanyStamp" class="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                                        <span class="text-gray-500 text-sm">Upload Stamp</span>
+                                    </div>
+                                    <img x-show="tempCompanyStamp" :src="tempCompanyStamp" alt="Stamp Preview" class="w-full h-full object-contain p-2">
+                                    <img x-show="!tempCompanyStamp && companyStamp" :src="companyStamp" alt="Company Stamp" class="w-full h-full object-contain p-2">
+                                </div>
+                            </div>
+                            <div class="flex items-center ml-4 space-x-2 pt-1">
+                                 <button x-show="!tempCompanyStamp" @click="triggerFileInput('stampFileInput')" class="flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">
+                                    <span class="material-symbols-outlined text-lg mr-1">edit</span> Edit
+                                </button>
+                                <button x-show="tempCompanyStamp" @click="saveEdit('companyStamp')" class="text-sm font-medium text-green-600 hover:underline">Save</button>
+                                <button x-show="tempCompanyStamp" @click="cancelEdit('companyStamp')" class="text-sm font-medium text-red-600 hover:underline">Cancel</button>
+                            </div>
+                        </div>
+            
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Templates Page -->
+            <div x-show="page === 'settings.emailTemplates'" x-data="emailEditor()" x-init="initQuill()">
+                <header class="mb-6">
+                    <h1 class="text-3xl font-semibold text-[var(--primary-text-color)]"><a href="#" @click.prevent="page='settings'" class="text-[var(--secondary-text-color)] hover:underline">Settings</a> / Email Templates</h1>
+                </header>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1">
+                        <div class="bg-[var(--card-bg-color)] rounded-lg shadow-md border border-[var(--border-color)] flex flex-col" style="height: 600px;">
+                            <div class="p-4 border-b border-[var(--border-color)] flex justify-between items-center">
+                                <h2 class="text-lg font-semibold text-[var(--primary-text-color)]">Templates</h2>
+                                <button @click.prevent="beginNewTemplate()" :disabled="isCreatingNewTemplate" class="flex items-center gap-1 bg-[var(--primary-color)] text-white text-xs font-medium px-2 py-1 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span class="material-symbols-outlined text-base">add</span>
+                                    New
+                                </button>
+                            </div>
+                            <div class="overflow-y-auto flex-grow">
+                                <ul class="divide-y divide-[var(--border-color)]">
+                                    <li x-show="isCreatingNewTemplate" x-transition>
+                                        <div class="p-2 bg-blue-50 dark:bg-slate-800">
+                                            <div class="flex items-center gap-2">
+                                                <input type="text"
+                                                    x-ref="newTemplateInput"
+                                                    x-model="newTemplateName"
+                                                    @keydown.enter="saveNewTemplate()"
+                                                    @keydown.escape.prevent="cancelNewTemplate()"
+                                                    placeholder="Enter template name..."
+                                                    class="flex-grow w-full rounded-md border-gray-300 dark:border-gray-600 bg-[var(--card-bg-color)] px-3 py-2 text-sm text-[var(--primary-text-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)]">
+                                                <button @click="saveNewTemplate()" :disabled="!newTemplateName.trim()" class="p-1 text-green-600 hover:text-green-800 disabled:opacity-40 disabled:cursor-not-allowed">
+                                                    <span class="material-symbols-outlined">check_circle</span>
+                                                </button>
+                                                <button @click="cancelNewTemplate()" class="p-1 text-red-500 hover:text-red-700">
+                                                    <span class="material-symbols-outlined">cancel</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <template x-for="(template, key) in templates" :key="key">
+                                        <li>
+                                            <a href="#" @click.prevent="loadTemplate(key)" class="block px-4 py-3 hover:bg-[var(--sidebar-hover-bg-color)]" :class="{'bg-[var(--unread-notification-bg-color)]': selectedTemplate === key}">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="font-medium text-sm text-[var(--primary-text-color)]" x-text="template.name"></span>
+                                                    <div class="flex items-center gap-2" :class="{ 'opacity-50': isCreatingNewTemplate }">
+                                                        <button @click.prevent.stop="renameTemplate(key)" :disabled="isCreatingNewTemplate" class="text-[var(--secondary-text-color)] hover:text-[var(--primary-color)] disabled:cursor-not-allowed"><span class="material-symbols-outlined text-lg">edit</span></button>
+                                                        <button @click.prevent.stop="deleteTemplate(key)" :disabled="isCreatingNewTemplate" class="text-[var(--secondary-text-color)] hover:text-red-500 disabled:cursor-not-allowed"><span class="material-symbols-outlined text-lg">delete</span></button>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <div class="bg-[var(--card-bg-color)] rounded-lg shadow-md border border-[var(--border-color)] flex flex-col h-[600px]">
+                            <div class="p-4 border-b border-[var(--border-color)]">
+                                <input type="text" id="email-subject" x-model="subject" class="w-full rounded-md bg-transparent border-gray-300 dark:border-gray-600 shadow-sm focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)] sm:text-sm" placeholder="Subject" style="color: var(--primary-text-color);">                            </div>
+                            <div id="editor-wrapper" class="flex-grow flex flex-col">
+                                <div id="editor" class="flex-grow">
+                                    </div>
+                            </div>
+                            <div id="toolbar">
+                                <!-- Updated toolbar with reduced spacing -->
+                                <span class="ql-formats">
+                                    <select class="ql-font" title="Font"></select>
+                                    <select class="ql-header" title="Heading Level"></select>
+                                </span>
+
+                                <div class="ql-divider"></div>
+
+                                <span class="ql-formats">
+                                    <button class="ql-bold" title="Bold"></button>
+                                    <button class="ql-italic" title="Italic"></button>
+                                    <button class="ql-underline" title="Underline"></button>
+                                    <button class="ql-strike" title="Strikethrough"></button>
+                                    <select class="ql-color" title="Font Color"></select>
+                                </span>
+
+                                <div class="ql-divider"></div>
+
+                                <span class="ql-formats">
+                                    <button class="ql-list" value="ordered" title="Ordered List"></button>
+                                    <button class="ql-list" value="bullet" title="Bulleted List"></button>
+                                    <button class="ql-indent" value="-1" title="Decrease Indent"></button>
+                                    <button class="ql-indent" value="+1" title="Increase Indent"></button>
+                                </span>
+
+                                <div class="ql-divider"></div>
+
+                                <span class="ql-formats">
+                                    <select class="ql-align" title="Alignment"></select>
+                                    <button class="ql-blockquote" title="Blockquote"></button>
+                                </span>
+
+                                <div class="ql-divider"></div>
+
+                                <span class="ql-formats">
+                                    <button class="ql-link" title="Insert Link"></button>
+                                    <button class="ql-image" title="Insert Image"></button>
+                                    <button class="ql-attach-files" title="Attach files">
+                                        <span class="material-symbols-outlined !text-[16px]">attach_file</span>
+                                    </button>
+                                    <button class="ql-insert-emojis" title="Insert emojis">
+                                        <span class="material-symbols-outlined !text-[16px]">sentiment_satisfied</span>
+                                    </button>
+                                </span>
+
+                                <div class="ql-divider"></div>
+
+                                <span class="ql-formats">
+                                    <button class="ql-clean" title="Remove Formatting"></button>
+                                </span>
+                            </div>
+                            <div class="p-4 border-[var(--border-color)] flex justify-end gap-3">
+                                <button @click="discardChanges()" class="bg-gray-200 text-gray-800 font-medium px-4 py-2 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500 transition-colors">Discard</button>
+                                <button @click="saveTemplate()" class="bg-[var(--primary-color)] text-white font-medium px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input type="file" x-ref="attachmentInput" @change="handleAttachments($event)" multiple class="hidden">
+            </div>
+            <div x-show="page === 'settings.manageUsers'">
+                <header class="mb-6">
+                    <h1 class="text-3xl font-semibold text-[var(--primary-text-color)]">
+                        <a href="#" @click.prevent="page='settings'" class="text-[var(--secondary-text-color)] hover:underline">Settings</a> / Manage Users
+                    </h1>
+                </header>
+
+                <div class="bg-[var(--card-bg-color)] rounded-lg shadow-md border border-[var(--border-color)] p-6 overflow-hidden">
+                    <div class="overflow-x-auto -mx-6 px-6">
+                        <table class="min-w-full divide-y divide-[var(--border-color)]">
+                            <thead class="bg-[var(--primary-color)]"> <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Emp ID</th> <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Name</th>   <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Job Title</th><th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Department</th> </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[var(--border-color)]">
+                                <template x-for="employee in employees" :key="employee.id">
+                                    <tr class="hover:bg-[var(--sidebar-hover-bg-color)] cursor-pointer" @click="openEmployeeModal(employee)">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--primary-text-color)]" x-text="employee.id"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--primary-text-color)]" x-text="`${employee.firstName} ${employee.lastName}`"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--primary-text-color)]" x-text="employee.jobTitle"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--primary-text-color)]" x-text="employee.department"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div x-show="showEmployeeModal"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 scale-90"
+     x-transition:enter-end="opacity-100 scale-100"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100 scale-100"
+     x-transition:leave-end="opacity-0 scale-90"
+     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[1001]"
+     @click.outside="closeEmployeeModal()">
+     
+    <div class="bg-[var(--card-bg-color)] rounded-lg shadow-xl max-w-2xl w-full p-6 sm:p-8 relative transform transition-all overflow-y-auto max-h-[90vh]"
+         @click.stop>
+        <button @click="closeEmployeeModal()" class="absolute top-4 right-4 text-[var(--secondary-text-color)] hover:text-[var(--primary-text-color)]">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+
+        <h2 class="text-2xl font-semibold text-[var(--primary-text-color)] mb-6 border-b pb-3 border-[var(--border-color)]">Employee Details</h2>
+
+        <div x-if="currentEmployee">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 mb-8">
+                <div class="md:col-span-1 flex flex-col items-center">
+                    <h3 class="text-lg font-medium text-[var(--primary-text-color)] mb-4">Picture</h3>
+                    <div class="w-40 h-40 rounded-full bg-gray-200 dark:bg-gray-700 mb-4 flex items-center justify-center overflow-hidden border border-[var(--border-color)]">
+                        <span x-show="!currentEmployee.picture && !tempEmployeePicture" class="material-symbols-outlined text-6xl text-gray-400 dark:text-gray-500">person</span>
+                        <img x-show="tempEmployeePicture" :src="tempEmployeePicture" alt="Picture Preview" class="w-full h-full object-cover p-1">
+                        <img x-show="!tempEmployeePicture && currentEmployee.picture" :src="currentEmployee.picture" alt="Employee Picture" class="w-full h-full object-cover p-1">
+                    </div>
+                    <input type="file" x-ref="employeePictureFileInput" @change="handleEmployeeImageUpload($event, 'picture')" accept="image/*" class="hidden">
+                    <div class="flex items-center space-x-2">
+                         <button @click="triggerFileInput('employeePictureFileInput')" class="flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">
+                            <span class="material-symbols-outlined text-lg mr-1">edit</span> Edit Picture
+                        </button>
+                        <button x-show="tempEmployeePicture" @click="saveEmployeeEdit('picture')" class="text-sm font-medium text-green-600 hover:underline">Save</button>
+                        <button x-show="tempEmployeePicture" @click="cancelEmployeeEdit('picture')" class="text-sm font-medium text-red-600 hover:underline">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="md:col-span-1 flex flex-col items-center">
+                    <h3 class="text-lg font-medium text-[var(--primary-text-color)] mb-4">Signature</h3>
+                    <div class="h-32 w-full bg-gray-100 dark:bg-gray-800 border border-[var(--border-color)] rounded mb-4 flex items-center justify-center">
+                        <span x-show="!currentEmployee.signature && !tempEmployeeSignature" class="material-symbols-outlined text-5xl text-gray-400 dark:text-gray-500">signature</span>
+                        <img x-show="tempEmployeeSignature" :src="tempEmployeeSignature" alt="Signature Preview" class="w-full h-full object-contain p-1">
+                        <img x-show="!tempEmployeeSignature && currentEmployee.signature" :src="currentEmployee.signature" alt="Employee Signature" class="w-full h-full object-contain p-1">
+                    </div>
+                    <input type="file" x-ref="employeeSignatureFileInput" @change="handleEmployeeImageUpload($event, 'signature')" accept="image/*" class="hidden">
+                    <div class="flex items-center space-x-2">
+                         <button @click="triggerFileInput('employeeSignatureFileInput')" class="flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">
+                            <span class="material-symbols-outlined text-lg mr-1">edit</span> Edit Signature
+                        </button>
+                        <button x-show="tempEmployeeSignature" @click="saveEmployeeEdit('signature')" class="text-sm font-medium text-green-600 hover:underline">Save</button>
+                        <button x-show="tempEmployeeSignature" @click="cancelEmployeeEdit('signature')" class="text-sm font-medium text-red-600 hover:underline">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex items-center border-b border-[var(--border-color)] py-3">
+                    <label class="block text-sm font-medium text-[var(--secondary-text-color)] w-32 shrink-0">Username</label>
+                    <div class="flex-1"> <p x-show="!editingEmployeeUsername"
+                           x-text="currentEmployee.username || 'N/A'"
+                           :class="{ 'text-gray-400 dark:text-gray-500': !currentEmployee.username }"
+                           class="w-64 text-base text-[var(--primary-text-color)] py-2 rounded-md border border-transparent bg-transparent truncate"> </p>
+                        <input x-show="editingEmployeeUsername"
+                               x-model="tempEmployeeUsername"
+                               @keydown.enter="saveEmployeeEdit('username')"
+                               @keydown.escape="cancelEmployeeEdit('username')"
+                               placeholder="Enter username"
+                               class="w-64 rounded-md border-[var(--border-color)] bg-transparent px-3 py-2 text-base text-[var(--primary-text-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] truncate" type="text"/>
+                    </div>
+                    <div class="flex items-center ml-4 space-x-2">
+                        <button x-show="!editingEmployeeUsername" @click="startEmployeeEditing('username')" class="flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">
+                            <span class="material-symbols-outlined text-lg mr-1">edit</span> Edit
+                        </button>
+                        <button x-show="editingEmployeeUsername"
+                                @click="saveEmployeeEdit('username')"
+                                :disabled="!tempEmployeeUsername.trim()"
+                                :class="{'opacity-50 cursor-not-allowed': !tempEmployeeUsername.trim()}"
+                                class="text-sm font-medium text-green-600 hover:underline">Save</button>
+                        <button x-show="editingEmployeeUsername" @click="cancelEmployeeEdit('username')" class="text-sm font-medium text-red-600 hover:underline">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center border-b border-[var(--border-color)] py-3">
+                    <label class="block text-sm font-medium text-[var(--secondary-text-color)] w-32 shrink-0">Password</label>
+                    <div class="flex-1">
+                        <p x-show="!editingEmployeePassword"
+                            x-text="currentEmployee.password ? '••••••••' : 'N/A'"
+                            :class="{ 'text-gray-400 dark:text-gray-500': !currentEmployee.password }"
+                            class="w-64 text-base text-[var(--primary-text-color)] py-2 rounded-md border border-transparent bg-transparent truncate">
+                        </p>
+                        <input x-show="editingEmployeePassword"
+                                x-model="tempEmployeePassword"
+                                @keydown.enter="saveEmployeeEdit('password')"
+                                @keydown.escape="cancelEmployeeEdit('password')"
+                                placeholder="Enter new password"
+                                class="w-64 rounded-md border-[var(--border-color)] bg-transparent px-3 py-2 text-base text-[var(--primary-text-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] truncate" type="password"/>
+                    </div>
+                    <div class="flex items-center ml-4 space-x-2">
+                        <button x-show="!editingEmployeePassword" @click="startEmployeeEditing('password')" class="flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">
+                            <span class="material-symbols-outlined text-lg mr-1">edit</span> Reset Password
+                        </button>
+                        <button x-show="editingEmployeePassword"
+                                @click="saveEmployeeEdit('password')"
+                                :disabled="!tempEmployeePassword.trim()"
+                                :class="{'opacity-50 cursor-not-allowed': !tempEmployeePassword.trim()}"
+                                class="text-sm font-medium text-green-600 hover:underline">Save</button>
+                        <button x-show="editingEmployeePassword" @click="cancelEmployeeEdit('password')" class="text-sm font-medium text-red-600 hover:underline">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center border-b border-[var(--border-color)] py-3">
+                    <label class="block text-sm font-medium text-[var(--secondary-text-color)] w-32 shrink-0">Email</label>
+                    <div class="flex-1"> <p x-show="!editingEmployeeEmail"
+                           x-text="currentEmployee.email || 'N/A'"
+                           :class="{ 'text-gray-400 dark:text-gray-500': !currentEmployee.email }"
+                           class="w-64 text-base text-[var(--primary-text-color)] py-2 rounded-md border border-transparent bg-transparent truncate"> </p>
+                        <input x-show="editingEmployeeEmail"
+                               x-model="tempEmployeeEmail"
+                               @keydown.enter="saveEmployeeEdit('email')"
+                               @keydown.escape="cancelEmployeeEdit('email')"
+                               placeholder="Enter email"
+                               class="w-64 rounded-md border-[var(--border-color)] bg-transparent px-3 py-2 text-base text-[var(--primary-text-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] truncate" type="email"/>
+                    </div>
+                    <div class="flex items-center ml-4 space-x-2">
+                        <button x-show="!editingEmployeeEmail" @click="startEmployeeEditing('email')" class="flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">
+                            <span class="material-symbols-outlined text-lg mr-1">edit</span> Edit
+                        </button>
+                        <button x-show="editingEmployeeEmail"
+                                @click="saveEmployeeEdit('email')"
+                                :disabled="!tempEmployeeEmail.trim()"
+                                :class="{'opacity-50 cursor-not-allowed': !tempEmployeeEmail.trim()}"
+                                class="text-sm font-medium text-green-600 hover:underline">Save</button>
+                        <button x-show="editingEmployeeEmail" @click="cancelEmployeeEdit('email')" class="text-sm font-medium text-red-600 hover:underline">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center border-b border-[var(--border-color)] py-3">
+                    <label class="block text-sm font-medium text-[var(--secondary-text-color)] w-32 shrink-0">First Name</label>
+                    <div class="flex-1"> <p x-show="!editingEmployeeFirstName"
+                           x-text="currentEmployee.firstName || 'N/A'"
+                           :class="{ 'text-gray-400 dark:text-gray-500': !currentEmployee.firstName }"
+                           class="w-64 text-base text-[var(--primary-text-color)] py-2 rounded-md border border-transparent bg-transparent truncate"> </p>
+                        <input x-show="editingEmployeeFirstName"
+                               x-model="tempEmployeeFirstName"
+                               @keydown.enter="saveEmployeeEdit('firstName')"
+                               @keydown.escape="cancelEmployeeEdit('firstName')"
+                               placeholder="Enter first name"
+                               class="w-64 rounded-md border-[var(--border-color)] bg-transparent px-3 py-2 text-base text-[var(--primary-text-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] truncate" type="text"/>
+                    </div>
+                    <div class="flex items-center ml-4 space-x-2">
+                        <button x-show="!editingEmployeeFirstName" @click="startEmployeeEditing('firstName')" class="flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">
+                            <span class="material-symbols-outlined text-lg mr-1">edit</span> Edit
+                        </button>
+                        <button x-show="editingEmployeeFirstName"
+                                @click="saveEmployeeEdit('firstName')"
+                                :disabled="!tempEmployeeFirstName.trim()"
+                                :class="{'opacity-50 cursor-not-allowed': !tempEmployeeFirstName.trim()}"
+                                class="text-sm font-medium text-green-600 hover:underline">Save</button>
+                        <button x-show="editingEmployeeFirstName" @click="cancelEmployeeEdit('firstName')" class="text-sm font-medium text-red-600 hover:underline">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center border-b border-[var(--border-color)] py-3">
+                    <label class="block text-sm font-medium text-[var(--secondary-text-color)] w-32 shrink-0">Last Name</label>
+                    <div class="flex-1"> <p x-show="!editingEmployeeLastName"
+                           x-text="currentEmployee.lastName || 'N/A'"
+                           :class="{ 'text-gray-400 dark:text-gray-500': !currentEmployee.lastName }"
+                           class="w-64 text-base text-[var(--primary-text-color)] py-2 rounded-md border border-transparent bg-transparent truncate"> </p>
+                        <input x-show="editingEmployeeLastName"
+                               x-model="tempEmployeeLastName"
+                               @keydown.enter="saveEmployeeEdit('lastName')"
+                               @keydown.escape="cancelEmployeeEdit('lastName')"
+                               placeholder="Enter last name"
+                               class="w-64 rounded-md border-[var(--border-color)] bg-transparent px-3 py-2 text-base text-[var(--primary-text-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] truncate" type="text"/>
+                    </div>
+                    <div class="flex items-center ml-4 space-x-2">
+                        <button x-show="!editingEmployeeLastName" @click="startEmployeeEditing('lastName')" class="flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">
+                            <span class="material-symbols-outlined text-lg mr-1">edit</span> Edit
+                        </button>
+                        <button x-show="editingEmployeeLastName"
+                                @click="saveEmployeeEdit('lastName')"
+                                :disabled="!tempEmployeeLastName.trim()"
+                                :class="{'opacity-50 cursor-not-allowed': !tempEmployeeLastName.trim()}"
+                                class="text-sm font-medium text-green-600 hover:underline">Save</button>
+                        <button x-show="editingEmployeeLastName" @click="cancelEmployeeEdit('lastName')" class="text-sm font-medium text-red-600 hover:underline">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center border-b border-[var(--border-color)] py-3">
+                    <label class="block text-sm font-medium text-[var(--secondary-text-color)] w-32 shrink-0">Job Title</label>
+                    <div class="flex-1"> <p x-show="!editingEmployeeJobTitle"
+                           x-text="currentEmployee.jobTitle || 'N/A'"
+                           :class="{ 'text-gray-400 dark:text-gray-500': !currentEmployee.jobTitle }"
+                           class="w-64 text-base text-[var(--primary-text-color)] py-2 rounded-md border border-transparent bg-transparent truncate"> </p>
+                        <input x-show="editingEmployeeJobTitle"
+                               x-model="tempEmployeeJobTitle"
+                               @keydown.enter="saveEmployeeEdit('jobTitle')"
+                               @keydown.escape="cancelEmployeeEdit('jobTitle')"
+                               placeholder="Enter job title"
+                               class="w-64 rounded-md border-[var(--border-color)] bg-transparent px-3 py-2 text-base text-[var(--primary-text-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] truncate" type="text"/>
+                    </div>
+                    <div class="flex items-center ml-4 space-x-2">
+                        <button x-show="!editingEmployeeJobTitle" @click="startEmployeeEditing('jobTitle')" class="flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">
+                            <span class="material-symbols-outlined text-lg mr-1">edit</span> Edit
+                        </button>
+                        <button x-show="editingEmployeeJobTitle"
+                                @click="saveEmployeeEdit('jobTitle')"
+                                :disabled="!tempEmployeeJobTitle.trim()"
+                                :class="{'opacity-50 cursor-not-allowed': !tempEmployeeJobTitle.trim()}"
+                                class="text-sm font-medium text-green-600 hover:underline">Save</button>
+                        <button x-show="editingEmployeeJobTitle" @click="cancelEmployeeEdit('jobTitle')" class="text-sm font-medium text-red-600 hover:underline">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center border-b border-[var(--border-color)] py-3">
+                    <label class="block text-sm font-medium text-[var(--secondary-text-color)] w-32 shrink-0">Department</label>
+                    <div class="flex-1"> <p x-show="!editingEmployeeDepartment"
+                           x-text="currentEmployee.department || 'N/A'"
+                           :class="{ 'text-gray-400 dark:text-gray-500': !currentEmployee.department }"
+                           class="w-64 text-base text-[var(--primary-text-color)] py-2 rounded-md border border-transparent bg-transparent truncate"> </p>
+                        <input x-show="editingEmployeeDepartment"
+                               x-model="tempEmployeeDepartment"
+                               @keydown.enter="saveEmployeeEdit('department')"
+                               @keydown.escape="cancelEmployeeEdit('department')"
+                               placeholder="Enter department"
+                               class="w-64 rounded-md border-[var(--border-color)] bg-transparent px-3 py-2 text-base text-[var(--primary-text-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] truncate" type="text"/>
+                    </div>
+                    <div class="flex items-center ml-4 space-x-2">
+                        <button x-show="!editingEmployeeDepartment" @click="startEmployeeEditing('department')" class="flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">
+                            <span class="material-symbols-outlined text-lg mr-1">edit</span> Edit
+                        </button>
+                        <button x-show="editingEmployeeDepartment"
+                                @click="saveEmployeeEdit('department')"
+                                :disabled="!tempEmployeeDepartment.trim()"
+                                :class="{'opacity-50 cursor-not-allowed': !tempEmployeeDepartment.trim()}"
+                                class="text-sm font-medium text-green-600 hover:underline">Save</button>
+                        <button x-show="editingEmployeeDepartment" @click="cancelEmployeeEdit('department')" class="text-sm font-medium text-red-600 hover:underline">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center border-b border-[var(--border-color)] py-3">
+                    <label class="block text-sm font-medium text-[var(--secondary-text-color)] w-32 shrink-0">Role</label>
+                    <div class="flex-1"> <p x-show="!editingEmployeeRole"
+                           x-text="currentEmployee.role || 'N/A'"
+                           :class="{ 'text-gray-400 dark:text-gray-500': !currentEmployee.role }"
+                           class="w-64 text-base text-[var(--primary-text-color)] py-2 rounded-md border border-transparent bg-transparent truncate"> </p>
+                        <input x-show="editingEmployeeRole"
+                               x-model="tempEmployeeRole"
+                               @keydown.enter="saveEmployeeEdit('role')"
+                               @keydown.escape="cancelEmployeeEdit('role')"
+                               placeholder="Enter role"
+                               class="w-64 rounded-md border-[var(--border-color)] bg-transparent px-3 py-2 text-base text-[var(--primary-text-color)] focus:border-[var(--primary-color)] focus:ring-1 focus:ring-[var(--primary-color)] truncate" type="text"/>
+                    </div>
+                    <div class="flex items-center ml-4 space-x-2">
+                        <button x-show="!editingEmployeeRole" @click="startEmployeeEditing('role')" class="flex items-center text-sm font-medium text-[var(--primary-color)] hover:underline">
+                            <span class="material-symbols-outlined text-lg mr-1">edit</span> Edit
+                        </button>
+                        <button x-show="editingEmployeeRole"
+                                @click="saveEmployeeEdit('role')"
+                                :disabled="!tempEmployeeRole.trim()"
+                                :class="{'opacity-50 cursor-not-allowed': !tempEmployeeRole.trim()}"
+                                class="text-sm font-medium text-green-600 hover:underline">Save</button>
+                        <button x-show="editingEmployeeRole" @click="cancelEmployeeEdit('role')" class="text-sm font-medium text-red-600 hover:underline">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alpine.js -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<!-- Quill.js -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<!-- Application Logic -->
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
+    let alpineApp;
+    let emailTemplatesData = {
+        generalSignatureRequired: { name: 'General Signature Required', subject: 'Action Required: Signature for [Document Name]', body: `<p>Hello [Recipient Name],</p><p><br></p><p>Your signature is required for the document: "[Document Name]". Please review and sign at your earliest convenience.</p><p><br></p><p>Thank you.</p>`, attachments: [] },
+        purchaseOrder: { name: 'Purchase Order', subject: 'Purchase Order for Approval: [PO Number]', body: `<p>Dear Team,</p><p><br></p><p>Please review and approve the attached Purchase Order: "[PO Number]" for [Vendor Name].</p><p><br></p><p>Thank you.</p>`, attachments: [] },
+        offerLetterCandidate: { name: 'Offer Letter - Candidate', subject: 'Your Offer from [Company Name]', body: `<p>Dear [Candidate Name],</p><p><br></p><p>Congratulations! We are pleased to offer you the position of [Job Title] at [Company Name]. Please find your detailed offer letter attached for your review and signature.</p><p><br></p><p>We look forward to you joining our team.</p><p><br></p><p>Best regards,<br>The HR Team</p>`, attachments: [] },
+        offerLetterApproval: { name: 'Offer Letter - Approval', subject: 'Approval Required: Offer Letter for [Candidate Name]', body: `<p>Hello Team,</p><p><br></p><p>The offer letter for the [Job Title] position for candidate [Candidate Name] is ready for your review and approval.</p><p><br></p><p>Thank you.</p>`, attachments: [] },
+        costProposalApproval: { name: 'Cost Proposal - Approval', subject: 'Approval Required: Cost Proposal for [Project Name]', body: `<p>Dear Team,</p><p><br></p><p>Please review and approve the cost proposal for the project: "[Project Name]".</p><p><br></p><p>Regards.</p>`, attachments: [] },
+        costProposalClient: { name: 'Cost Proposal - Client', subject: 'Cost Proposal for [Project Name]', body: `<p>Dear [Client Name],</p><p><br></p><p>Please find the attached cost proposal for "[Project Name]" for your review. We look forward to discussing it with you further.</p><p><br></p><p>Best regards,<br>[Your Name/Company Name]</p>`, attachments: [] },
+        documentSignedRecipient: { name: 'Document Signed - Recipient', subject: 'Fully Signed: [Document Name]', body: `<p>Hello,</p><p><br></p><p>The document, "[Document Name]", has been fully signed by all parties. A copy is attached for your records.</p><p><br></p><p>Thank you.</p>`, attachments: [] }
+    };
+
+    function app() {
+        alpineApp = {
+            // State
+            loggedIn: false,
+            username: '',
+            password: '',
+            error: '',
+            shaking: false,
+            page: 'home',
+            userType: 'admin',
+            isViewSwitcherCollapsed: false,
+            isRecaptchaVerified: false,
+            rememberMe: false,
+            theme: 'light',
+            companyName: '',
+            companyLogo: null,
+            companyStamp: null,
+            tempCompanyName: '',
+            tempCompanyLogo: null,
+            tempCompanyStamp: null,
+            editingCompanyName: false,
+            recaptchaWidgetId: null,
+            isRecaptchaApiLoaded: false,
+
+            // Employee Modal State
+            showEmployeeModal: false,
+            currentEmployee: null, 
+            tempEmployeeUsername: '',
+            tempEmployeeEmail: '',
+            tempEmployeeFirstName: '',
+            tempEmployeeLastName: '',
+            tempEmployeeJobTitle: '',
+            tempEmployeeDepartment: '',
+            tempEmployeeRole: '',
+            tempEmployeeSignature: null,
+            tempEmployeePicture: null,
+            tempEmployeePassword: '', 
+
+            // Editing state for individual fields
+            editingEmployeeUsername: false,
+            editingEmployeeEmail: false,
+            editingEmployeeFirstName: false,
+            editingEmployeeLastName: false,
+            editingEmployeeJobTitle: false,
+            editingEmployeeDepartment: false,
+            editingEmployeeRole: false,
+            editingEmployeePassword: false, 
+
+            employees: [
+                { id: 'EMP001', username: 'melvin', password: 'melvin123', email: 'melvin@example.com', firstName: 'Melvin', lastName: 'Mathew', jobTitle: 'COO', department: 'Management', role: 'Administrator', signature: null, picture: null },
+                { id: 'EMP002', username: 'asad', password: 'password123', email: 'asad@example.com', firstName: 'Asad', lastName: 'Rauf', jobTitle: 'Intern', department: 'HR', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP003', username: 'monica', password: 'password123', email: 'monica@example.com', firstName: 'Monica', lastName: 'Sharma', jobTitle: 'Project Manager', department: 'Operations', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP004', username: 'celci', password: 'password123', email: 'celci@example.com', firstName: 'Celci', lastName: 'Johnson', jobTitle: 'HR Specialist', department: 'HR', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP005', username: 'suhail', password: 'password123', email: 'suhail@example.com', firstName: 'Suhail', lastName: 'Khan', jobTitle: 'Finance Analyst', department: 'Finance', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP006', username: 'omar', password: 'password123', email: 'omar@example.com', firstName: 'Omar', lastName: 'Farooq', jobTitle: 'Legal Counsel', department: 'Legal', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP007', username: 'laila', password: 'password123', email: 'laila@example.com', firstName: 'Laila', lastName: 'Hassan', jobTitle: 'Marketing Coordinator', department: 'Marketing', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP008', username: 'ahmed', password: 'password123', email: 'ahmed@example.com', firstName: 'Ahmed', lastName: 'Ibrahim', jobTitle: 'Software Engineer', department: 'IT', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP009', username: 'safwan', password: 'password123', email: 'safwan@example.com', firstName: 'Safwan', lastName: 'Khan', jobTitle: 'Sales Manager', department: 'Sales', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP010', username: 'aditya', password: 'password123', email: 'aditya@example.com', firstName: 'Aditya', lastName: 'Singh', jobTitle: 'Data Analyst', department: 'Analytics', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP011', username: 'fatima', password: 'password123', email: 'fatima@example.com', firstName: 'Fatima', lastName: 'Al-Mansoori', jobTitle: 'Admin Assistant', department: 'Administration', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP012', username: 'khalid', password: 'password123', email: 'khalid@example.com', firstName: 'Khalid', lastName: 'Al-Rashid', jobTitle: 'Senior Accountant', department: 'Finance', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP013', username: 'sara', password: 'password123', email: 'sara@example.com', firstName: 'Sara', lastName: 'Qureshi', jobTitle: 'UX Designer', department: 'Product Development', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP014', username: 'david', password: 'password123', email: 'david@example.com', firstName: 'David', lastName: 'Lee', jobTitle: 'Network Administrator', department: 'IT', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP015', username: 'maria', password: 'password123', email: 'maria@example.com', firstName: 'Maria', lastName: 'Garcia', jobTitle: 'Customer Support Lead', department: 'Customer Service', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP016', username: 'john', password: 'password123', email: 'john@example.com', firstName: 'John', lastName: 'Doe', jobTitle: 'Business Development Exec.', department: 'Sales', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP017', username: 'emily', password: 'password123', email: 'emily@example.com', firstName: 'Emily', lastName: 'White', jobTitle: 'Content Creator', department: 'Marketing', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP018', username: 'ali', password: 'password123', email: 'ali@example.com', firstName: 'Ali', lastName: 'Zaki', jobTitle: 'Logistics Coordinator', department: 'Operations', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP019', username: 'noura', password: 'password123', email: 'noura@example.com', firstName: 'Noura', lastName: 'Salem', jobTitle: 'Training Specialist', department: 'HR', role: 'Standard', signature: null, picture: null },
+                { id: 'EMP020', username: 'chris', password: 'password123', email: 'chris@example.com', firstName: 'Chris', lastName: 'Evans', jobTitle: 'Research Scientist', department: 'R&D', role: 'Standard', signature: null, picture: null }
+            ],
+
+            init() {
+                // Theme Logic
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme) {
+                    this.theme = savedTheme;
+                } else {
+                    this.theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+                if (this.theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+                this.$watch('theme', (newValue) => {
+                    localStorage.setItem('theme', newValue);
+                    if (newValue === 'dark') {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                    if (this.recaptchaWidgetId !== null) {
+                        this.renderRecaptcha();
+                    }
+                });
+
+                // Company Info Logic
+                const savedCompanyName = localStorage.getItem('companyName');
+                if (savedCompanyName) {
+                    this.companyName = savedCompanyName;
+                }
+                const savedCompanyLogo = localStorage.getItem('companyLogo');
+                if (savedCompanyLogo) {
+                    this.companyLogo = savedCompanyLogo;
+                }
+                const savedCompanyStamp = localStorage.getItem('companyStamp');
+                if (savedCompanyStamp) {
+                    this.companyStamp = savedCompanyStamp;
+                }
+            },
+            
+            setTheme(newTheme) {
+                this.theme = newTheme;
+            },
+
+            renderRecaptcha() {
+                if (!this.isRecaptchaApiLoaded || this.loggedIn) return;
+
+                const parent = document.getElementById('recaptcha-parent');
+                if (!parent) return;
+
+                const oldContainer = document.getElementById('recaptcha-container');
+                if (oldContainer) {
+                    parent.removeChild(oldContainer);
+                }
+
+                const newContainer = document.createElement('div');
+                newContainer.id = 'recaptcha-container';
+                parent.appendChild(newContainer);
+
+                this.recaptchaWidgetId = grecaptcha.render('recaptcha-container', {
+                    'sitekey': '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
+                    'callback': onRecaptchaSuccess,
+                    'theme': this.theme
+                });
+            },
+
+            triggerFileInput(refName) {
+                this.$refs[refName].click();
+            },
+
+            startEditing(field) {
+                if (field === 'companyName') {
+                    this.tempCompanyName = this.companyName;
+                    this.editingCompanyName = true;
+                }
+            },
+
+            saveEdit(field) {
+                if (field === 'companyName') {
+                    this.companyName = this.tempCompanyName;
+                    localStorage.setItem('companyName', this.companyName);
+                    this.editingCompanyName = false;
+                } else if (field === 'companyLogo') {
+                    this.companyLogo = this.tempCompanyLogo;
+                    localStorage.setItem('companyLogo', this.companyLogo);
+                    this.tempCompanyLogo = null;
+                } else if (field === 'companyStamp') {
+                    this.companyStamp = this.tempCompanyStamp;
+                    localStorage.setItem('companyStamp', this.companyStamp);
+                    this.tempCompanyStamp = null;
+                }
+            },
+
+            cancelEdit(field) {
+                if (field === 'companyName') {
+                    this.editingCompanyName = false;
+                    this.tempCompanyName = '';
+                } else if (field === 'companyLogo') {
+                    this.tempCompanyLogo = null;
+                } else if (field === 'companyStamp') {
+                    this.tempCompanyStamp = null;
+                }
+            },
+
+            handleFileUpload(event, type) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        if (type === 'logo') {
+                            this.tempCompanyLogo = e.target.result;
+                        } else if (type === 'stamp') {
+                            this.tempCompanyStamp = e.target.result;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+
+            login() {
+                if (!this.isRecaptchaVerified) {
+                    if (this.error === 'Please complete the reCAPTCHA.') {
+                        this.shaking = true;
+                        setTimeout(() => { this.shaking = false }, 500);
+                    }
+                    this.error = 'Please complete the reCAPTCHA.';
+                    return;
+                }
+
+                if (this.username === 'melvin' && this.password === 'melvin123') {
+                    this.loggedIn = true;
+                    this.error = '';
+                    this.username = '';
+                    this.password = '';
+                } else {
+                    if (this.error) {
+                        this.shaking = true;
+                        setTimeout(() => { this.shaking = false }, 500);
+                    }
+                    this.error = 'Invalid username or password.';
+                    grecaptcha.reset(this.recaptchaWidgetId);
+                    this.isRecaptchaVerified = false;
+                }
+            },
+
+            logout() {
+                this.loggedIn = false;
+                this.page = 'home';
+                this.isRecaptchaVerified = false;
+                this.$nextTick(() => {
+                    this.renderRecaptcha();
+                });
+            },
+
+            openEmployeeModal(employee) {
+                this.currentEmployee = JSON.parse(JSON.stringify(employee)); 
+                this.showEmployeeModal = true;
+                this.resetEmployeeTempFields();
+                this.resetEmployeeEditingStates();
+            },
+
+            closeEmployeeModal() {
+                this.showEmployeeModal = false;
+                this.currentEmployee = null;
+                this.resetEmployeeTempFields();
+                this.resetEmployeeEditingStates();
+            },
+
+            resetEmployeeTempFields() {
+                this.tempEmployeeUsername = '';
+                this.tempEmployeeEmail = '';
+                this.tempEmployeeFirstName = '';
+                this.tempEmployeeLastName = '';
+                this.tempEmployeeJobTitle = '';
+                this.tempEmployeeDepartment = '';
+                this.tempEmployeeRole = '';
+                this.tempEmployeeSignature = null;
+                this.tempEmployeePicture = null;
+                this.tempEmployeePassword = ''; 
+            },
+
+            resetEmployeeEditingStates() {
+                this.editingEmployeeUsername = false;
+                this.editingEmployeeEmail = false;
+                this.editingEmployeeFirstName = false;
+                this.editingEmployeeLastName = false;
+                this.editingEmployeeJobTitle = false;
+                this.editingEmployeeDepartment = false;
+                this.editingEmployeeRole = false;
+                this.editingEmployeePassword = false; 
+            },
+
+            startEmployeeEditing(field) {
+                const map = {
+                    'username': 'tempEmployeeUsername', 'email': 'tempEmployeeEmail', 'firstName': 'tempEmployeeFirstName', 'lastName': 'tempEmployeeLastName', 'jobTitle': 'tempEmployeeJobTitle', 'department': 'tempEmployeeDepartment', 'role': 'tempEmployeeRole', 'password': 'tempEmployeePassword',
+                };
+                const editingMap = {
+                    'username': 'editingEmployeeUsername', 'email': 'editingEmployeeEmail', 'firstName': 'editingEmployeeFirstName', 'lastName': 'editingEmployeeLastName', 'jobTitle': 'editingEmployeeJobTitle', 'department': 'editingEmployeeDepartment', 'role': 'editingEmployeeRole', 'password': 'editingEmployeePassword',
+                };
+                if (map[field]) {
+                    this[map[field]] = this.currentEmployee[field];
+                    this[editingMap[field]] = true;
+                    this.$nextTick(() => {
+                        this.$el.querySelector(`input[x-model="tempEmployee${field.charAt(0).toUpperCase() + field.slice(1)}"]`).focus();
+                    });
+                }
+            },
+
+            saveEmployeeEdit(field) {
+                const map = {
+                    'username': 'tempEmployeeUsername', 'email': 'tempEmployeeEmail', 'firstName': 'tempEmployeeFirstName', 'lastName': 'tempEmployeeLastName', 'jobTitle': 'tempEmployeeJobTitle', 'department': 'tempEmployeeDepartment', 'role': 'tempEmployeeRole', 'password': 'tempEmployeePassword',
+                };
+                const editingMap = {
+                    'username': 'editingEmployeeUsername', 'email': 'editingEmployeeEmail', 'firstName': 'editingEmployeeFirstName', 'lastName': 'editingEmployeeLastName', 'jobTitle': 'editingEmployeeJobTitle', 'department': 'editingEmployeeDepartment', 'role': 'editingEmployeeRole', 'password': 'editingEmployeePassword',
+                };
+
+                if (field === 'picture') {
+                    this.currentEmployee.picture = this.tempEmployeePicture;
+                    this.tempEmployeePicture = null;
+                } else if (field === 'signature') {
+                    this.currentEmployee.signature = this.tempEmployeeSignature;
+                    this.tempEmployeeSignature = null;
+                } else if (map[field]) {
+                    this.currentEmployee[field] = this[map[field]];
+                    this[editingMap[field]] = false;
+                }
+
+                const index = this.employees.findIndex(emp => emp.id === this.currentEmployee.id);
+                if (index !== -1) {
+                    this.employees[index] = { ...this.employees[index], ...this.currentEmployee }; 
+                }
+            },
+
+            cancelEmployeeEdit(field) {
+                const map = {
+                    'username': 'editingEmployeeUsername', 'email': 'editingEmployeeEmail', 'firstName': 'editingEmployeeFirstName', 'lastName': 'editingEmployeeLastName', 'jobTitle': 'editingEmployeeJobTitle', 'department': 'editingEmployeeDepartment', 'role': 'editingEmployeeRole', 'password': 'editingEmployeePassword',
+                };
+                if (field === 'picture') {
+                    this.tempEmployeePicture = null;
+                } else if (field === 'signature') {
+                    this.tempEmployeeSignature = null;
+                } else if (map[field]) {
+                    this[map[field]] = false;
+                }
+            },
+
+            handleEmployeeImageUpload(event, type) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        if (type === 'picture') {
+                            this.tempEmployeePicture = e.target.result;
+                        } else if (type === 'signature') {
+                            this.tempEmployeeSignature = e.target.result;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+        };
+        return alpineApp;
+    }
+
+    function recaptchaLoaded() {
+        if (alpineApp) {
+            alpineApp.isRecaptchaApiLoaded = true;
+            if (!alpineApp.loggedIn) {
+                alpineApp.renderRecaptcha();
+            }
+        }
+    }
+
+    function onRecaptchaSuccess() {
+        window.dispatchEvent(new CustomEvent('recaptcha-verified', {
+            detail: { verified: true }
+        }));
+    }
+
+    function newDocument() {
+        return {
+            files: [],
+            recipients: [],
+            sequentialSigning: true,
+            emailTemplates: emailTemplatesData,
+
+            get signers() {
+                return this.recipients
+                    .filter(r => r.role === 'signer')
+                    .sort((a, b) => a.order - b.order);
+            },
+
+            handleFiles(fileList) {
+                for (let i = 0; i < fileList.length; i++) {
+                    const file = fileList[i];
+                    if (!this.files.some(f => f.name === file.name && f.size === file.size)) {
+                         this.files.push(file);
+                    }
+                }
+            },
+
+            removeFile(index) {
+                this.files.splice(index, 1);
+            },
+
+            addRecipient() {
+                this.recipients.push({
+                    name: '',
+                    email: '',
+                    role: 'signer',
+                    template: 'generalSignatureRequired',
+                    order: this.recipients.filter(r => r.role === 'signer').length + 1,
+                    message: ''
+                });
+            },
+
+            removeRecipient(index) {
+                this.recipients.splice(index, 1);
+            },
+
+            formatBytes(bytes, decimals = 2) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            }
+        }
+    }
+
+function assignFields() {
+    return {
+        recipients: [],
+        files: [],
+        selectedRecipientId: null,
+        fields: [],
+        draggingField: null,
+        pdfDoc: null,
+        pageNum: 1,
+        pageRendering: false,
+        pageNumPending: null,
+        documentType: 'none', // Can be 'pdf', 'image', or 'none'
+        documentUrl: null, // URL for image previews
+        
+        initialize() {
+            if (this.recipients.length > 0) {
+                this.selectedRecipientId = 0;
+            }
+            this.loadDocument();
+        },
+
+        loadDocument() {
+            if (this.files.length === 0) {
+                this.documentType = 'none';
+                return;
+            }
+            const file = this.files[0];
+
+            if (file.type === 'application/pdf') {
+                this.documentType = 'pdf';
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const loadingTask = pdfjsLib.getDocument({ data: e.target.result });
+                    loadingTask.promise.then((pdf) => {
+                        this.pdfDoc = pdf;
+                        this.renderPage(this.pageNum);
+                    }, (reason) => {
+                        console.error("PDF loading error:", reason);
+                        this.documentType = 'none';
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (file.type.startsWith('image/')) {
+                this.documentType = 'image';
+                this.documentUrl = URL.createObjectURL(file);
+            } else {
+                this.documentType = 'none';
+                console.warn("Unsupported file type for preview:", file.type);
+            }
+        },
+
+        renderPage(num) {
+            this.pageRendering = true;
+            this.pdfDoc.getPage(num).then((page) => {
+                const canvas = document.getElementById('pdf-canvas');
+                const ctx = canvas.getContext('2d');
+                // Use a fixed scale or calculate based on container
+                const viewport = page.getViewport({ scale: 1.5 });
+                
+                const container = document.getElementById('document-viewer-container');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                container.style.width = `${viewport.width}px`;
+                container.style.height = `${viewport.height}px`;
+
+                const renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport
+                };
+                const renderTask = page.render(renderContext);
+                renderTask.promise.then(() => {
+                    this.pageRendering = false;
+                    if (this.pageNumPending !== null) {
+                        this.renderPage(this.pageNumPending);
+                        this.pageNumPending = null;
+                    }
+                });
+            });
+        },
+
+        dragStart(event, fieldType) {
+            event.dataTransfer.setData('text/plain', fieldType);
+        },
+
+        dropField(event) {
+            if (!this.recipients[this.selectedRecipientId]) {
+                alert("Please select a recipient before adding fields.");
+                return;
+            }
+            const fieldType = event.dataTransfer.getData('text/plain');
+            const viewer = document.getElementById('document-viewer-container');
+            const rect = viewer.getBoundingClientRect();
+            // Adjust for scroll position of the viewer's parent
+            const scrollLeft = viewer.parentElement.scrollLeft;
+            const scrollTop = viewer.parentElement.scrollTop;
+            
+            const x = event.clientX - rect.left + scrollLeft;
+            const y = event.clientY - rect.top + scrollTop;
+
+            this.fields.push({
+                id: Date.now(),
+                type: fieldType,
+                recipientId: this.selectedRecipientId,
+                x: x,
+                y: y,
+                width: 120,
+                height: 40
+            });
+        },
+
+        startDrag(field, event) {
+            this.draggingField = field;
+            // Calculate initial offset from the element's top-left corner
+            const initialX = event.clientX;
+            const initialY = event.clientY;
+            const fieldInitialX = field.x;
+            const fieldInitialY = field.y;
+
+            const mouseMoveHandler = (e) => {
+                if (this.draggingField) {
+                    const dx = e.clientX - initialX;
+                    const dy = e.clientY - initialY;
+                    this.draggingField.x = fieldInitialX + dx;
+                    this.draggingField.y = fieldInitialY + dy;
+                }
+            };
+
+            const mouseUpHandler = () => {
+                this.draggingField = null;
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+            };
+
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+        }
+    }
+}
+
+    function emailEditor() {
+        return {
+            selectedTemplate: 'generalSignatureRequired',
+            subject: '',
+            quill: null,
+            originalState: null,
+            isCreatingNewTemplate: false,
+            newTemplateName: '',
+            attachedFiles: [], 
+            templates: emailTemplatesData,
+            initQuill() {
+                this.quill = new Quill('#editor', {
+                    theme: 'snow',
+                    placeholder: 'Type your template...',
+                    modules: {
+                        toolbar: {
+                            container: '#toolbar',
+                            handlers: {
+                                'attach-files': () => { 
+                                    this.$refs.attachmentInput.click();
+                                }
+                            }
+                        }
+                    }
+                });
+                this.loadTemplate(this.selectedTemplate);
+
+                const toolbar = this.quill.getModule('toolbar');
+                toolbar.addHandler('undo', () => this.quill.history.undo());
+                toolbar.addHandler('redo', () => this.quill.history.redo());
+            },
+            loadTemplate(templateName) {
+                if (!this.templates[templateName]) {
+                    this.selectedTemplate = null;
+                    this.subject = '';
+                    this.quill.root.innerHTML = '';
+                    this.attachedFiles = [];
+                    return;
+                }
+                this.selectedTemplate = templateName;
+                this.subject = this.templates[templateName].subject;
+                this.quill.root.innerHTML = this.templates[templateName].body;
+                this.attachedFiles = [...this.templates[templateName].attachments]; 
+                this.originalState = {
+                    subject: this.subject,
+                    body: this.quill.root.innerHTML,
+                    attachments: [...this.attachedFiles] 
+                };
+            },
+            saveTemplate() {
+                if (this.selectedTemplate) {
+                    this.templates[this.selectedTemplate].subject = this.subject;
+                    this.templates[this.selectedTemplate].body = this.quill.root.innerHTML;
+                    this.templates[this.selectedTemplate].attachments = [...this.attachedFiles];
+                    this.originalState = {
+                        subject: this.subject,
+                        body: this.quill.root.innerHTML,
+                        attachments: [...this.attachedFiles]
+                    };
+                    alert('Template saved!');
+                }
+            },
+            discardChanges() {
+                if (this.selectedTemplate && this.originalState) {
+                    this.subject = this.originalState.subject;
+                    this.quill.root.innerHTML = this.originalState.body;
+                    this.attachedFiles = [...this.originalState.attachments];
+                }
+            },
+            beginNewTemplate() {
+                this.isCreatingNewTemplate = true;
+                this.newTemplateName = '';
+                this.$nextTick(() => { this.$refs.newTemplateInput.focus(); });
+            },
+            cancelNewTemplate() {
+                this.isCreatingNewTemplate = false;
+            },
+            saveNewTemplate() {
+                const name = this.newTemplateName.trim();
+                if (!name) return;
+
+                if (Object.values(this.templates).some(t => t.name.toLowerCase() === name.toLowerCase())) {
+                    alert('A template with this name already exists.');
+                    return;
+                }
+
+                const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
+                
+                this.templates[key] = { name: name, subject: '', body: '', attachments: [] }; 
+                this.isCreatingNewTemplate = false;
+                this.loadTemplate(key);
+            },
+            deleteTemplate(key) {
+                if (confirm(`Are you sure you want to delete "${this.templates[key].name}"?`)) {
+                    delete this.templates[key];
+                    if (this.selectedTemplate === key) {
+                        this.loadTemplate(Object.keys(this.templates)[0] || null);
+                    }
+                }
+            },
+            renameTemplate(key) {
+                const newName = prompt('Enter the new name for the template:', this.templates[key].name);
+                if (newName && newName.trim() !== '') {
+                    this.templates[key].name = newName.trim();
+                }
+            },
+            handleAttachments(event) {
+                const files = event.target.files;
+                if (files.length > 0) {
+                    for (let i = 0; i < files.length; i++) {
+                        if (!this.attachedFiles.some(f => f.name === files[i].name)) {
+                            this.attachedFiles.push({ name: files[i].name, size: files[i].size });
+                        }
+                    }
+                }
+                event.target.value = '';
+            },
+            removeAttachment(index) {
+                this.attachedFiles.splice(index, 1);
+            }
+        }
+    }
+</script>
+</body>
+</html>
